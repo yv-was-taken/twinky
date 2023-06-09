@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "module": "es2022",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "target": "es2016"
+  }
+}

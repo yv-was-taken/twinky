@@ -1,0 +1,33 @@
+{
+  "type": "module",
+  "dependencies": {
+    "ccxt": "^3.0.73",
+    "meow": "^11.0.0",
+    "ts-node": "^10.9.1"
+  },
+  "scripts": {
+    "start": "ts-node-esm ./src/parseInputs.ts"
+  },
+  "name": "blink",
+  "version": "0.1.0",
+  "description": "crypto modular API CLI suite",
+  "main": "index.ts",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ywvlfy/blink.git"
+  },
+  "keywords": [
+    "crypto",
+    "cex",
+    "trading",
+    "api",
+    "cli"
+  ],
+  "author": "yves",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ywvlfy/blink/issues"
+  },
+  "homepage": "https://github.com/ywvlfy/blink#readme"
+}
