@@ -1,3 +1,3 @@
-export { flags, inputs } from "./parseInputs";
+import { flags, inputs } from "./parseInputs";
 
-
+export { flags, inputs };

@@ -1,7 +1,9 @@
-import meow from "meow";
+import { expect } from "chai";
+import { spawn } from "child_process";
 
-const cli = meow(
-  `
+describe("command line flags", () => {
+  it("should display help message when --help flag is passed", () => {
+    const helpMessage = `
                  Blink: Crypto Trading API Modular CLI Suite
 
                  Usage:
@@ -30,44 +32,19 @@ const cli = meow(
                         > select direction
                         >   - long
                         >   - short
-                 `,
-  {
-    importMeta: import.meta,
-    flags: {
-      chase: {
-        type: "string",
-        shortFlag: "c",
-      },
-      scale: {
-        type: "string",
-        shortFlag: "s",
-        choices: ["linear", "exponential"],
-      },
-      from: {
-        type: "number",
-        shortflag: "f",
-        isRequired: (flags, inputs) => {
-          if (flags.scale) {
-            return true;
-          }
-          return false;
-        },
-      },
-      to: {
-        type: "number",
-        shortflag: "t",
-        isRequired: (flags, inputs) => {
-          if (flags.scale) {
-            return true;
-          }
-          return false;
-        },
-      },
-    },
-  }
-);
-
-const flags = cli.flags;
-const inputs = cli.input;
-
-export { inputs, flags };
+                 `;
+    const helpFlagCommand = spawn("node", ["./index.ts", "--help"]);
+    helpFlagCommand.stdout.on("data", (data) => {
+      expect(data.toString().toEqual(helpMessage));
+    });
+  });
+  it("should output version when --version flag is called", () => {
+    const versionCommand = spawn("npm start", ["--version"]);
+    versionCommand.stdout.on("data", (data) => {
+      expect(data.toString().toEqual("0.1.0"));
+    });
+  });
+  it("should require from and to flags when --scale flag is passed.", () => {
+    const command = spawn("npm start", ["--scale", "--from", "1"]);
+  });
+});
