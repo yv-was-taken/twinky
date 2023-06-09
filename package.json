@@ -2,17 +2,20 @@
   "type": "module",
   "dependencies": {
     "ccxt": "^3.0.73",
+    "chai": "^4.3.7",
+    "husky": "^8.0.3",
     "meow": "^11.0.0",
+    "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1"
   },
   "scripts": {
-    "start": "ts-node-esm ./src/parseInputs.ts"
+    "start": "ts-node-esm ./src/parseInputs.ts",
+    "prepare": "husky install"
   },
   "name": "blink",
   "version": "0.1.0",
   "description": "crypto modular API CLI suite",
   "main": "index.ts",
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ywvlfy/blink.git"
@@ -29,5 +32,9 @@
   "bugs": {
     "url": "https://github.com/ywvlfy/blink/issues"
   },
-  "homepage": "https://github.com/ywvlfy/blink#readme"
+  "homepage": "https://github.com/ywvlfy/blink#readme",
+  "devDependencies": {
+    "husky": "^8.0.0",
+    "pretty-quick": "^3.1.3"
+  }
 }
