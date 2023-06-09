@@ -14,7 +14,7 @@
   },
   "name": "blink",
   "version": "0.1.0",
-  "description": "crypto modular API CLI suite",
+  "description": "Blink: Crypto Trading API Modular CLI Suite",
   "main": "index.ts",
   "repository": {
     "type": "git",

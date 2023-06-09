@@ -2,8 +2,6 @@ import meow from "meow";
 
 const cli = meow(
   `
-                 Blink: Crypto Trading API Modular CLI Suite
-
                  Usage:
                      $ blink <action> <subcommands> [flags]:wq
 
