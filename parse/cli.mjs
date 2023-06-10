@@ -1,11 +1,7 @@
-import { expect } from "chai";
-import { spawn } from "child_process";
+import meow from "meow";
 
-describe("command line flags", () => {
-  it("should display help message when --help flag is passed", () => {
-    const helpMessage = `
-                 Blink: Crypto Trading API Modular CLI Suite
-
+const cli = meow(
+  `
                  Usage:
                      $ blink <action> <subcommands> [flags]:wq
 
@@ -25,29 +21,58 @@ describe("command line flags", () => {
                      $ blink long limit ethusdt binance @0.1 //spread
                      $ blink long limit ethusdt bybit 10 layer linear @1920 @2080
                      $ blink close all
-                 
+
                      you can also omit certain options and blink will prompt you with the rest!
 
                      $ blink open 
                         > select direction
                         >   - long
                         >   - short
-                 `;
-    const command = spawn("npm start", ["-- ", "--help"]);
-    command.stdout.on("end", (data) => {
-      expect(data.toString().trim().toEqual(helpMessage));
-    });
-  });
-  it("should output version when --version flag is called", () => {
-    const command = spawn("npm start", ["-- ", "--version"]);
-    command.stdout.on("exit", (data) => {
-      expect(data.toString().trim().toEqual("0.1.0"));
-    });
-  });
-  it("should require from and to flags when --scale flag is passed.", () => {
-    const command = spawn("npm start", ["-- ", "--scale", "--from", "1"]);
-    command.stdout.on("exit", (data) => {
-      expect(data.toString().trim().toEqual("Missing required flag --to"));
-    });
-  });
-});
+                 `,
+  {
+    importMeta: import.meta,
+    flags: {
+      chase: {
+        type: "string",
+        shortFlag: "c",
+      },
+      scale: {
+        type: "boolean",
+        shortFlag: "s",
+        choices: [true, false],
+        default: false,
+      },
+      scaleType: {
+        type: "string",
+        shortFlag: "t",
+        choices: ["linear", "exponential", "logarithmic"], //logarithmic choice is actuall f(x) = ln(x-1) [[x-intercept at 0]];
+        default: "linear",
+      },
+      from: {
+        type: "number",
+        shortflag: "f",
+        isRequired: (flags, inputs) => {
+          if (flags.scale) {
+            return true;
+          }
+          return false;
+        },
+      },
+      to: {
+        type: "number",
+        shortflag: "t",
+        isRequired: (flags, inputs) => {
+          if (flags.scale) {
+            return true;
+          }
+          return false;
+        },
+      },
+    },
+  },
+);
+
+const flags = cli.flags;
+const inputs = cli.input;
+
+export { inputs, flags, cli };

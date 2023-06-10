@@ -1,21 +1,22 @@
 {
   "type": "module",
   "dependencies": {
+    "@jsdevtools/chai-exec": "^2.1.1",
     "ccxt": "^3.0.73",
     "chai": "^4.3.7",
     "husky": "^8.0.3",
     "meow": "^11.0.0",
-    "ts-mocha": "^10.0.0",
-    "ts-node": "^10.9.1"
+    "mocha": "^9.2.2"
   },
   "scripts": {
-    "start": "ts-node index.ts",
-    "prepare": "husky install"
+    "start": "node index.mjs",
+    "prepare": "husky install",
+    "test": "mocha tests/**.*js"
   },
   "name": "blink",
   "version": "0.1.0",
   "description": "Blink: Crypto Trading API Modular CLI Suite",
-  "main": "index.ts",
+  "main": "index.mjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ywvlfy/blink.git"
