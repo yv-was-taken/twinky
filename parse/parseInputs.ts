@@ -1,3 +1,5 @@
+/** @format */
+
 import meow from "meow";
 
 const cli = meow(
@@ -40,6 +42,7 @@ const cli = meow(
         type: "string",
         shortFlag: "s",
         choices: ["linear", "exponential"],
+        default: "linear",
       },
       from: {
         type: "number",
@@ -62,7 +65,7 @@ const cli = meow(
         },
       },
     },
-  }
+  },
 );
 
 const flags = cli.flags;
