@@ -33,18 +33,21 @@ describe("command line flags", () => {
                         >   - long
                         >   - short
                  `;
-    const helpFlagCommand = spawn("node", ["./index.ts", "--help"]);
-    helpFlagCommand.stdout.on("data", (data) => {
-      expect(data.toString().toEqual(helpMessage));
+    const command = spawn("npm start", ["-- ", "--help"]);
+    command.stdout.on("end", (data) => {
+      expect(data.toString().trim().toEqual(helpMessage));
     });
   });
   it("should output version when --version flag is called", () => {
-    const versionCommand = spawn("npm start", ["--version"]);
-    versionCommand.stdout.on("data", (data) => {
-      expect(data.toString().toEqual("0.1.0"));
+    const command = spawn("npm start", ["-- ", "--version"]);
+    command.stdout.on("exit", (data) => {
+      expect(data.toString().trim().toEqual("0.1.0"));
     });
   });
   it("should require from and to flags when --scale flag is passed.", () => {
-    const command = spawn("npm start", ["--scale", "--from", "1"]);
+    const command = spawn("npm start", ["-- ", "--scale", "--from", "1"]);
+    command.stdout.on("exit", (data) => {
+      expect(data.toString().trim().toEqual("Missing required flag --to"));
+    });
   });
 });
