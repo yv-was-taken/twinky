@@ -37,7 +37,6 @@ describe("command line flags", () => {
          >   - short
                  `;
     const command = chaiExec("node index.mjs --help");
-    console.log("stdout", command.stdout);
     chai.expect(command.stdout.trim()).to.contain(helpMessage.trim());
   });
   it("should output version when --version flag is called", () => {
