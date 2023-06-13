@@ -1,0 +1,6 @@
+{
+  "exchange": "bybit",
+  "market": "perp",
+  "quoteCurrency": "USDT",
+  "asset": "BTC"
+}

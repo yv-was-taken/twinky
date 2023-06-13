@@ -1,18 +1,18 @@
 const fs = require("fs");
-function setEnv(apiKey) {
+function setEnv(exchange, apiKey) {
   const env = {
-    API_KEY: apiKey,
+    [exchange]: {
+      API_KEY: apiKey,
+    },
   };
   fs.writeFileSync(".env.json", JSON.stringify(env));
 }
 
-function getEnv() {
+function getEnv(exchange) {
   try {
     const envFileContent = fs.readFileSync(".env.json", "utf8");
     const env = JSON.parse(envFileContent);
-    return {
-      API_KEY: env.API_KEY,
-    };
+    return env;
   } catch (err) {
     throw err;
   }

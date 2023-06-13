@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "@inquirer/prompts": "^2.1.1",
     "@jsdevtools/chai-exec": "^2.1.1",
     "ccxt": "^3.0.73",
     "chai": "^4.3.7",

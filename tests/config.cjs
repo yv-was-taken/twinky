@@ -18,8 +18,9 @@ describe("setConfig", () => {
   it("should set config with default values when isDefault is true", async () => {
     const expectedConfig = {
       exchange: "bybit",
-      ticker: "btcusdt",
       market: "perp",
+      quoteCurrency: "USDT",
+      asset: "BTC",
     };
 
     await setConfig({ isDefault: true });
@@ -32,15 +33,17 @@ describe("setConfig", () => {
 
   it("should set config with custom values when isDefault is false", async () => {
     const customConfig = {
-      exchange: "binance",
-      ticker: "ethusdt",
+      exchange: "bybit",
       market: "spot",
+      quoteCurrency: "USDC",
+      asset: "ETH",
     };
 
     await setConfig({
       exchange: customConfig.exchange,
-      ticker: customConfig.ticker,
       market: customConfig.market,
+      quoteCurrency: customConfig.quoteCurrency,
+      asset: customConfig.asset,
       isDefault: false,
     });
 
@@ -56,8 +59,9 @@ describe("getConfig", () => {
   it("should return the current config", () => {
     const expectedConfig = {
       exchange: "bybit",
-      ticker: "btcusdt",
       market: "perp",
+      quoteCurrency: "USDT",
+      asset: "BTC",
     };
 
     fs.writeFileSync("blinkConfig.json", JSON.stringify(expectedConfig));

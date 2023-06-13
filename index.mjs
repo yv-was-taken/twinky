@@ -1,4 +1,10 @@
-import { flags, inputs, cli } from "./parse/cli.mjs";
+import { verifySettings } from "./cli/verifySettings.mjs";
+import main from "./cli/main.js";
+import { inputs, flags } from "./parse/cli.mjs";
 
-console.log("flags", flags);
-console.log("inputs", inputs);
+async function app() {
+  await verifySettings();
+  await main(inputs, flags);
+}
+
+app();

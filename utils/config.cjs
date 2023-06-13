@@ -1,10 +1,17 @@
 const fs = require("fs");
 
-function setConfig({ exchange, ticker, market, isDefault }) {
+async function setConfig({
+  exchange,
+  market,
+  quoteCurrency,
+  asset,
+  isDefault,
+}) {
   const defaultConfig = {
     exchange: "bybit",
-    ticker: "btcusdt",
     market: "perp",
+    quoteCurrency: "USDT",
+    asset: "BTC",
   };
 
   let config;
@@ -16,28 +23,27 @@ function setConfig({ exchange, ticker, market, isDefault }) {
   }
 
   if (isDefault) {
-    fs.writeFileSync("blinkConfig.json", JSON.stringify(defaultConfig));
+    fs.writeFileSync("blinkConfig.json", JSON.stringify(config));
   } else {
-    config.exchange = exchange ?? defaultConfig.exchange;
-    config.ticker = ticker ?? defaultConfig.ticker;
-    config.market = market ?? defaultConfig.market;
+    if (exchange) config.exchange = exchange;
+    if (market) config.market = market;
+    if (quoteCurrency) config.quoteCurrency = quoteCurrency;
+    if (asset) config.asset = asset;
 
     fs.writeFileSync("blinkConfig.json", JSON.stringify(config));
   }
 }
 
-function getConfig() {
-  try {
-    const configFileContent = fs.readFileSync("blinkConfig.json", "utf8");
-    const config = JSON.parse(configFileContent);
-    return {
-      exchange: config.exchange,
-      ticker: config.ticker,
-      market: config.market,
-    };
-  } catch (err) {
-    throw err;
-  }
+async function getConfig() {
+  const config = JSON.parse(
+    fs.readFileSync("blinkConfig.json", { encoding: "utf8", flag: "a+" }),
+  );
+  return {
+    exchange: config.exchange,
+    market: config.market,
+    quoteCurrency: config.quoteCurrency,
+    asset: config.asset,
+  };
 }
 
 module.exports = {
