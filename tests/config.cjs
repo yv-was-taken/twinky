@@ -7,7 +7,7 @@ const expect = chai.expect;
 describe("setConfig", () => {
   beforeEach(() => {
     // Clear the config file before each test
-    fs.writeFileSync(".blinkConfig.json", JSON.stringify({}));
+    fs.writeFileSync(".blinkConfig.json", JSON.stringify({}, null, 2));
   });
 
   afterEach(() => {
@@ -64,7 +64,10 @@ describe("getConfig", () => {
       asset: "BTC",
     };
 
-    fs.writeFileSync(".blinkConfig.json", JSON.stringify(expectedConfig));
+    fs.writeFileSync(
+      ".blinkConfig.json",
+      JSON.stringify(expectedConfig, null, 2),
+    );
 
     const config = getConfig();
 

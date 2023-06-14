@@ -18,7 +18,10 @@ describe("setEnv", () => {
 
 describe("getEnv", () => {
   it("should return the environment variable", () => {
-    fs.writeFileSync(".env.json", JSON.stringify({ API_KEY: "test-api-key" }));
+    fs.writeFileSync(
+      ".env.json",
+      JSON.stringify({ API_KEY: "test-api-key" }, null, 2),
+    );
     const env = getEnv();
 
     expect(env.API_KEY).to.equal("test-api-key");

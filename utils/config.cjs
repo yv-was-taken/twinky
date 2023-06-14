@@ -23,14 +23,14 @@ async function setConfig({
   }
 
   if (isDefault) {
-    fs.writeFileSync(".blinkConfig.json", JSON.stringify(config));
+    fs.writeFileSync(".blinkConfig.json", JSON.stringify(config, null, 2));
   } else {
     if (exchange) config.exchange = exchange;
     if (market) config.market = market;
     if (quoteCurrency) config.quoteCurrency = quoteCurrency;
     if (asset) config.asset = asset;
 
-    fs.writeFileSync(".blinkConfig.json", JSON.stringify(config));
+    fs.writeFileSync(".blinkConfig.json", JSON.stringify(config, null, 2));
   }
 }
 

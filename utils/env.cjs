@@ -5,7 +5,7 @@ function setEnv(exchange, apiKey) {
       API_KEY: apiKey,
     },
   };
-  fs.writeFileSync(".env.json", JSON.stringify(env));
+  fs.writeFileSync(".env.json", JSON.stringify(env, null, 2));
 }
 
 function getEnv(exchange) {
