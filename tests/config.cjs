@@ -7,12 +7,12 @@ const expect = chai.expect;
 describe("setConfig", () => {
   beforeEach(() => {
     // Clear the config file before each test
-    fs.writeFileSync("blinkConfig.json", JSON.stringify({}));
+    fs.writeFileSync(".blinkConfig.json", JSON.stringify({}));
   });
 
   afterEach(() => {
     // Clean up the config file after each test
-    fs.unlinkSync("blinkConfig.json");
+    fs.unlinkSync(".blinkConfig.json");
   });
 
   it("should set config with default values when isDefault is true", async () => {
@@ -25,7 +25,7 @@ describe("setConfig", () => {
 
     await setConfig({ isDefault: true });
     const configFileContent = JSON.parse(
-      fs.readFileSync("blinkConfig.json", "utf8"),
+      fs.readFileSync(".blinkConfig.json", "utf8"),
     );
 
     expect(configFileContent).to.deep.equal(expectedConfig);
@@ -48,7 +48,7 @@ describe("setConfig", () => {
     });
 
     const configFileContent = JSON.parse(
-      fs.readFileSync("blinkConfig.json", "utf8"),
+      fs.readFileSync(".blinkConfig.json", "utf8"),
     );
 
     expect(configFileContent).to.deep.equal(customConfig);
@@ -64,7 +64,7 @@ describe("getConfig", () => {
       asset: "BTC",
     };
 
-    fs.writeFileSync("blinkConfig.json", JSON.stringify(expectedConfig));
+    fs.writeFileSync(".blinkConfig.json", JSON.stringify(expectedConfig));
 
     const config = getConfig();
 
@@ -72,7 +72,7 @@ describe("getConfig", () => {
   });
 
   it("should throw an error if the config file does not exist", () => {
-    fs.unlinkSync("blinkConfig.json");
+    fs.unlinkSync(".blinkConfig.json");
 
     expect(getConfig).to.throw(Error);
   });

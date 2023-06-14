@@ -6,6 +6,7 @@ import {
   quoteCurrencies,
 } from "../options/index.mjs";
 import { select, input } from "@inquirer/prompts";
+import * as fs from "fs";
 
 export async function setAsset(exchange, market, quoteCurrency) {
   while (true) {
@@ -25,8 +26,9 @@ export async function setAsset(exchange, market, quoteCurrency) {
 
 async function verifyConfig() {
   try {
-    await fs.readFile("config.json");
+    fs.readFileSync(".blinkConfig.json");
   } catch (err) {
+    console.log(err);
     const doConfig = await select({
       message:
         "config not found! Would you like to set a config? (select 'no' for default values",
@@ -62,7 +64,7 @@ async function verifyConfig() {
 }
 async function verifyEnv() {
   try {
-    await fs.readFile(".env.json");
+    fs.readFileSync(".env.json");
   } catch (err) {
     const { exchange } = await getConfig();
     const apiKey = await input({

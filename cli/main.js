@@ -12,7 +12,7 @@ import { cli } from "../parse/index.mjs";
 export default async function main(args, flags) {
   while (true) {
     const action =
-      flags.action === "none"
+      flags.action === "none" && !args.length
         ? await input({
             message:
               "select action when ready. or type 'help' for list of actions.",
@@ -68,9 +68,12 @@ export default async function main(args, flags) {
       case "exit":
         console.log("bye!");
         return;
+      case "none":
+        break;
       default:
         console.log("action not valid! please try again");
     }
-    if (!!args && !!flags) return;
+    if (flags.action === "exit" || (!!args.length && flags.action === "none"))
+      return;
   }
 }
