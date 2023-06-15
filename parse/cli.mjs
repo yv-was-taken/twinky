@@ -30,7 +30,23 @@ const cli = meow(
   //                        >   - short
   //                 `,
   `actions:
-        trade(t), listen(l), view(v), settings(s), exit
+        -trade(t)
+        --> execute trades.
+
+        -listen(l)
+        --> listen for and log portfolio updates in real time.
+
+        -view(v)
+        --> view portfolio, open orders, order history.
+
+        -settings(s)
+        --> view/modify config settings.
+
+        -help(h)
+        --> log this message.
+
+        -exit
+        --> exit the program.
     `,
   {
     importMeta: import.meta,

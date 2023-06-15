@@ -10,40 +10,47 @@ import {
 import { cli } from "../parse/index.mjs";
 
 export default async function main(args, flags) {
+  console.log(cli.help);
+  console.log(
+    "\nselect action when ready. or type 'help' for list of actions.",
+  );
   while (true) {
     const action =
       flags.action === "none" && !args.length
         ? await input({
-            message:
-              "select action when ready. or type 'help' for list of actions.",
+            message: `\n>`,
           })
         : flags.action;
     switch (action) {
       case "help":
+      case "h":
         console.log(cli.help);
         break;
       case "trade":
       case "t":
+        console.log("trade");
         //trade thing
         break;
 
       case "listen":
       case "l":
+        console.log("listen");
         //wss listening for new positions opened, closed.
         break;
       case "view":
       case "v":
+        console.log("view");
         //view thing
         break;
       case "settings":
       case "s":
         let configAction = await select({
           message: "config actions: ",
-          choices: ["view", "modify"],
+          choices: [{ value: "view" }, { value: "modify" }],
         });
         switch (configAction) {
           case "view":
-            console.log(getConfig());
+            console.log(await getConfig());
             break;
           case "modify":
             const { exchange, market, quoteCurrency, asset } = getConfig();
