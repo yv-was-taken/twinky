@@ -5,13 +5,15 @@ async function setConfig({
   market,
   quoteCurrency,
   asset,
-  isDefault,
+  leverage,
+  isDefault = false,
 }) {
   const defaultConfig = {
     exchange: "bybit",
     market: "perp",
     quoteCurrency: "USDT",
     asset: "BTC",
+    leverage: 1,
   };
 
   let config;
@@ -29,6 +31,7 @@ async function setConfig({
     if (market) config.market = market;
     if (quoteCurrency) config.quoteCurrency = quoteCurrency;
     if (asset) config.asset = asset;
+    if (leverage) config.leverage = leverage;
 
     fs.writeFileSync(".blinkConfig.json", JSON.stringify(config, null, 2));
   }

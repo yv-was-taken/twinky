@@ -1,13 +1,14 @@
-import { input, select } from "@inquirer/prompts";
-import { getConfig, setConfig } from "../utils/index.cjs";
+import { input, select, confirm } from "@inquirer/prompts";
+import { getConfig, setConfig, getEnv, setEnv } from "../utils/index.cjs";
 import {
   exchanges,
   markets,
   quoteCurrencies,
   getTickers,
 } from "../options/index.mjs";
-
 import { cli } from "../parse/index.mjs";
+import trade from "../actions/trade.js";
+import { verifySettings } from "./verifySettings.mjs";
 
 export default async function main(args, flags) {
   console.log(cli.help);
@@ -28,7 +29,7 @@ export default async function main(args, flags) {
         break;
       case "trade":
       case "t":
-        console.log("trade");
+        trade();
         //trade thing
         break;
 
@@ -50,25 +51,13 @@ export default async function main(args, flags) {
         });
         switch (configAction) {
           case "view":
-            console.log(await getConfig());
+            let answer = await confirm({ message: "view config?" });
+            if (answer) console.log(await getConfig());
+            answer = await confirm({ message: "view env?" });
+            if (answer) console.log(await getEnv());
             break;
           case "modify":
-            const { exchange, market, quoteCurrency, asset } = getConfig();
-            let newExchange = await select({
-              message: "exchange: ",
-              choices: exchanges,
-            });
-            let newMarket = await select({
-              message: "market: ",
-              choices: markets[exchange],
-            });
-            let newQuoteCurrency = await select({
-              message: "quote currency: ",
-              choices: quoteCurrencies[exchange][market],
-            });
-            console.log("updating settings...");
-            await setConfig();
-            console.log("settings updated!");
+            await verifySettings();
             break;
         }
         break;
