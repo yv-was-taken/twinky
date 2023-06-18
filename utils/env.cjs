@@ -1,5 +1,5 @@
 const fs = require("fs");
-function setEnv(exchange, apiKey = undefined, apiSecret = undefined) {
+function setEnv({ exchange, apiKey, apiSecret }) {
   const currentEnv = getEnv()[exchange];
   const currentKey = currentEnv.API_KEY;
   const currentSecret = currentEnv.API_SECRET;

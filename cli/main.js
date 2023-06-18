@@ -57,7 +57,37 @@ export default async function main(args, flags) {
             if (answer) console.log(await getEnv());
             break;
           case "modify":
-            await verifySettings();
+            const option = await select({
+              message: "what would you like to modify?",
+              choices: [{ value: "config" }, { value: "env" }],
+            });
+            switch (option) {
+              case "config":
+                const response = await select({
+                  message: "",
+                  choices: [
+                    { value: "exchange" },
+                    { value: "market" },
+                    { value: "quoteCurrency" },
+                    { value: "asset" },
+                    { value: "leverage" },
+                  ],
+                });
+                await setConfig({ [response]: response });
+              case "env":
+                const exchange = await select({
+                  message: "",
+                  choices: exchanges,
+                });
+                const envChoice = await select({
+                  message: "",
+                  choices: [{ value: "apiKey" }, { value: "apiSecret" }],
+                });
+                const envResponse = await input({ message: "new value: " });
+                await setEnv({ exchange: exchange, [envChoice]: envResponse });
+            }
+
+            await verifySettings({});
             break;
         }
         break;
