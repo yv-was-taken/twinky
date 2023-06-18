@@ -29,7 +29,62 @@ export default async function main(args, flags) {
         break;
       case "trade":
       case "t":
-        trade();
+        const { exchange, market, quoteCurrency } = getConfig();
+        const tickers = await getTickers(exchange, market, quoteCurrency);
+
+        let symbolCheck = false;
+        let symbol;
+        while (!symbolCheck) {
+          symbol = await input({ message: "symbol? (enter for default)" });
+          symbolCheck = true;
+          if (!tickers.includes(symbol)) {
+            console.log("ticker not found for: ", exchange, ".. try again");
+            symbolCheck = false;
+          }
+        }
+
+        if (symbol === "") symbol = config.asset + "/" + config.quoteCurrency;
+        let type = await select({
+          message: "order type?",
+          choices: [{ value: "market" }, { value: "limit" }],
+        });
+        let side = await select({
+          message: "long or short?",
+          choices: [
+            { name: "long", value: "buy" },
+            { name: "short", value: "sell" },
+          ],
+        });
+        let amount = parseInt(await input({ message: "order size?" }));
+        let price;
+        if (type === "limit") price = await input({ message: "price?" });
+
+        let isStop = await confirm({ message: "stop loss?" });
+        let stopLossPrice;
+        if (isStop)
+          stopLossPrice = parseInt(await input({ message: "stop price?" }));
+
+        let isTakeProfit = await confirm({ message: "take profit?" });
+        let takeProfitPrice;
+        if (isTakeProfit)
+          takeProfitPrice = parseInt(await input({ message: "take profit?" }));
+        let isReduce = await confirm({ message: "reduce only?" });
+
+        let params = {};
+        if (isReduce) params.type = "reduce-only";
+        if (isStop) params.stopLossPrice = stopLossPrice;
+        if (isTakeProfit) params.takeProfitPrice = takeProfitPrice;
+
+        await trade({
+          _exchange: exchange,
+          symbol: symbol,
+          type: type,
+          side: side,
+          amount: amount,
+          price: price,
+          params: params,
+        });
+
         //trade thing
         break;
 

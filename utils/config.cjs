@@ -37,7 +37,7 @@ async function setConfig({
   }
 }
 
-async function getConfig() {
+function getConfig() {
   const config = JSON.parse(
     fs.readFileSync(".blinkConfig.json", { encoding: "utf8", flag: "a+" }),
   );

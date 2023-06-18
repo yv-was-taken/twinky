@@ -43,7 +43,6 @@ async function verifyConfig({
         choices: [{ value: "yes" }, { value: "no" }],
       });
       if (doConfig === "yes") {
-        console.log("xxx", exchanges);
         let newExchange = exchange
           ? exchange
           : await select({
