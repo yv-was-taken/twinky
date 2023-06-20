@@ -76,19 +76,21 @@ export default async function main(args, flags) {
             { name: "short", value: "sell" },
           ],
         });
-        let amount = parseInt(await input({ message: "order size?" }));
+        let amount = parseFloat(await input({ message: "order size?" }));
         let price;
         if (type === "limit") price = await input({ message: "price?" });
 
         let isStop = await confirm({ message: "stop loss?" });
         let stopLossPrice;
         if (isStop)
-          stopLossPrice = parseInt(await input({ message: "stop price?" }));
+          stopLossPrice = parseFloat(await input({ message: "stop price?" }));
 
         let isTakeProfit = await confirm({ message: "take profit?" });
         let takeProfitPrice;
         if (isTakeProfit)
-          takeProfitPrice = parseInt(await input({ message: "take profit?" }));
+          takeProfitPrice = parseFloat(
+            await input({ message: "take profit?" }),
+          );
         let isReduce = await confirm({ message: "reduce only?" });
 
         let params = {};
