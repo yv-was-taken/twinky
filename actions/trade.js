@@ -11,6 +11,7 @@ export default async function trade({
   params,
 }) {
   const env = getEnv();
+  const leverage = getConfig().leverage;
   const exchange = _exchange ?? getConfig().exchange;
   const exchangeClass = ccxt[exchange];
   const connect = new exchangeClass({
@@ -18,7 +19,13 @@ export default async function trade({
     secret: env[exchange].API_SECRET,
   });
 
+  console.log("placing trade...");
   try {
+    //set leverage,
+    //throws err if leverage is already set to the same number
+    try {
+      await connect.setLeverage(leverage, symbol);
+    } catch {}
     const response = await connect.createOrder(
       symbol,
       type,
@@ -27,9 +34,10 @@ export default async function trade({
       price,
       params,
     );
-    //    console.log(response);
     console.log("trade placed!");
-    console.log("order ID: ", response.id);
+    console.log(
+      `\n${amount} of ${symbol} ${type} ${side} placed successfully.`,
+    );
 
     return;
   } catch (e) {

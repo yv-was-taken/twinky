@@ -13,7 +13,7 @@ async function setConfig({
     market: "perp",
     quoteCurrency: "USDT",
     asset: "BTC",
-    leverage: 1,
+    leverage: 10,
   };
 
   let config;
@@ -46,6 +46,7 @@ function getConfig() {
     market: config.market,
     quoteCurrency: config.quoteCurrency,
     asset: config.asset,
+    leverage: config.leverage,
   };
 }
 

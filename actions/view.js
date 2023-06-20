@@ -39,6 +39,8 @@ export default async function view(target) {
       console.log("total balance: ", totalBalance);
       break;
     case "order history":
+      let orders = await connect.fetchOrders();
+      console.log(orders);
       //do the thing
       break;
     case "open positions":

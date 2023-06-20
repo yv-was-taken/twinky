@@ -9,16 +9,16 @@ import {
 import { cli } from "../parse/index.mjs";
 import trade from "../actions/trade.js";
 import view from "../actions/view.js";
-import { verifySettings } from "./verifySettings.mjs";
-
-const config = getConfig();
+import { verifySettings, verifyConfig } from "./verifySettings.mjs";
 
 export default async function main(args, flags) {
+  const config = getConfig();
   console.log(cli.help);
-  console.log(
-    "\nselect action when ready. or type 'help' for list of actions.",
-  );
   while (true) {
+    console.log(
+      "\nselect action when ready. or type 'help' for list of actions.",
+    );
+
     const action =
       flags.action === "none" && !args.length
         ? await input({
@@ -47,9 +47,14 @@ export default async function main(args, flags) {
             asset = config.asset;
             quoteCurrency = config.quoteCurrency;
           } else {
-            let symbolArr = symbol.split("/");
-            asset = symbolArr[0];
-            quoteCurrency = symbolArr[1];
+            if (!symbol.includes("/")) {
+              asset = symbol;
+              quoteCurrency = config.quoteCurrency;
+            } else {
+              let symbolArr = symbol.split("/");
+              asset = symbolArr[0];
+              quoteCurrency = symbolArr[1];
+            }
           }
           symbol = asset + "/" + quoteCurrency + ":" + quoteCurrency;
           let tickerCheck = asset + quoteCurrency;
@@ -76,7 +81,17 @@ export default async function main(args, flags) {
             { name: "short", value: "sell" },
           ],
         });
-        let amount = parseFloat(await input({ message: "order size?" }));
+        let amountCheck = false;
+        let amount;
+        while (!amountCheck) {
+          amount = parseFloat(await input({ message: "order size?" }));
+          amountCheck = true;
+          if (!amount) {
+            console.log("amount cannot be blank.");
+            amountCheck = false;
+          }
+        }
+
         let price;
         if (type === "limit") price = await input({ message: "price?" });
 
@@ -97,7 +112,6 @@ export default async function main(args, flags) {
         if (isReduce) params.type = "reduce-only";
         if (isStop) params.stopLossPrice = stopLossPrice;
         if (isTakeProfit) params.takeProfitPrice = takeProfitPrice;
-        params.type = "linear";
 
         await trade({
           _exchange: exchange,
@@ -149,17 +163,8 @@ export default async function main(args, flags) {
             });
             switch (option) {
               case "config":
-                const response = await select({
-                  message: "",
-                  choices: [
-                    { value: "exchange" },
-                    { value: "market" },
-                    { value: "quoteCurrency" },
-                    { value: "asset" },
-                    { value: "leverage" },
-                  ],
-                });
-                await setConfig({ [response]: response });
+                await verifyConfig({});
+                break;
               case "env":
                 const exchange = await select({
                   message: "",
@@ -173,7 +178,6 @@ export default async function main(args, flags) {
                 await setEnv({ exchange: exchange, [envChoice]: envResponse });
             }
 
-            await verifySettings({});
             break;
         }
         break;
