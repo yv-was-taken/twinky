@@ -10,6 +10,8 @@ import { cli } from "../parse/index.mjs";
 import trade from "../actions/trade.js";
 import { verifySettings } from "./verifySettings.mjs";
 
+const config = getConfig();
+
 export default async function main(args, flags) {
   console.log(cli.help);
   console.log(
@@ -37,13 +39,31 @@ export default async function main(args, flags) {
         while (!symbolCheck) {
           symbol = await input({ message: "symbol? (enter for default)" });
           symbolCheck = true;
-          if (!tickers.includes(symbol)) {
-            console.log("ticker not found for: ", exchange, ".. try again");
+
+          let asset;
+          let quoteCurrency;
+          if (symbol === "") {
+            asset = config.asset;
+            quoteCurrency = config.quoteCurrency;
+          } else {
+            let symbolArr = symbol.split("/");
+            asset = symbolArr[0];
+            quoteCurrency = symbolArr[1];
+          }
+          symbol = asset + "/" + quoteCurrency + ":" + quoteCurrency;
+          let tickerCheck = asset + quoteCurrency;
+          if (!tickers.includes(tickerCheck)) {
+            console.log(
+              tickerCheck,
+              "not found for: ",
+              exchange,
+              ".. try again",
+            );
             symbolCheck = false;
           }
         }
+        console.log("trading:", symbol);
 
-        if (symbol === "") symbol = config.asset + "/" + config.quoteCurrency;
         let type = await select({
           message: "order type?",
           choices: [{ value: "market" }, { value: "limit" }],
@@ -74,6 +94,7 @@ export default async function main(args, flags) {
         if (isReduce) params.type = "reduce-only";
         if (isStop) params.stopLossPrice = stopLossPrice;
         if (isTakeProfit) params.takeProfitPrice = takeProfitPrice;
+        params.type = "linear";
 
         await trade({
           _exchange: exchange,

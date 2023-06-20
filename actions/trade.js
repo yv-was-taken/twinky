@@ -11,7 +11,7 @@ export default async function trade({
   params,
 }) {
   let bybit = new ccxt.bybit();
-  console.log("bybit ccxt ", JSON.stringify(bybit));
+  //    console.log("bybit ccxt ", JSON.parse(JSON.stringify(bybit)));
   const env = getEnv();
   const exchange = _exchange ?? getConfig().exchange;
   const exchangeClass = ccxt[exchange];
@@ -19,6 +19,9 @@ export default async function trade({
     apiKey: env[exchange].API_KEY,
     secret: env[exchange].API_SECRET,
   });
+
+  //   let balance = await connect.fetchBalance();
+  //   console.log("balance:", balance)
 
   try {
     const response = await connect.createOrder(
@@ -29,7 +32,10 @@ export default async function trade({
       price,
       params,
     );
-    console.log(response);
+    //    console.log(response);
+    console.log("trade placed!");
+    console.log("order ID: ", response.id);
+
     return;
   } catch (e) {
     // if the exception is thrown, it is "caught" and can be handled here
@@ -51,8 +57,8 @@ export default async function trade({
     }
   }
 
-  //    const markets = await connect.loadMarkets();
-  //    console.log('markets: ', markets);
+  //      const markets = await connect.loadMarkets();
+  //      console.log('markets: ', markets);
 
   //   {symbol, type, side, amount, price = undefined, params = {}}
   // await createOrder(symbol, type, side, amount, price, params);
