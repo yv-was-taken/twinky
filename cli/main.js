@@ -8,6 +8,7 @@ import {
 } from "../options/index.mjs";
 import { cli } from "../parse/index.mjs";
 import trade from "../actions/trade.js";
+import view from "../actions/view.js";
 import { verifySettings } from "./verifySettings.mjs";
 
 const config = getConfig();
@@ -116,8 +117,15 @@ export default async function main(args, flags) {
         break;
       case "view":
       case "v":
-        console.log("view");
-        //view thing
+        const target = await select({
+          message: "what would you like to view?",
+          choices: [
+            { value: "balance" },
+            { value: "order history" },
+            { value: "open positions" },
+          ],
+        });
+        await view(target);
         break;
       case "settings":
       case "s":
