@@ -81,11 +81,13 @@ export async function verifyConfig({
     let levCheck = false;
     let newLeverage;
     while (!levCheck) {
-      newLeverage = leverage
-        ? leverage
-        : await input({
+      newLeverage =
+        leverage ??
+        parseInt(
+          await input({
             message: "leverage: (max 10)",
-          });
+          }),
+        );
       levCheck = true;
       if (leverage > 10) {
         console.log("leverage too high. try again");
@@ -98,7 +100,7 @@ export async function verifyConfig({
       market: newMarket,
       quoteCurrency: newQuoteCurrency,
       asset: newAsset,
-      newLeverage: leverage,
+      leverage: newLeverage,
     });
     console.log("config updated!");
 
