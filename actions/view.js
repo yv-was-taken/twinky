@@ -38,13 +38,96 @@ export default async function view(target) {
       console.log("used balance: ", usedBalance);
       console.log("total balance: ", totalBalance);
       break;
-    case "order history":
-      let orders = await connect.fetchOrders();
-      console.log(orders);
-      //do the thing
+
+    case "open orders":
+      console.log("fetching open orders...");
+      let openOrders = await connect.fetchOpenOrders();
+      if (openOrders.length === 0) {
+        console.log("no orders open!");
+      } else {
+        for (const i in openOrders) {
+          let order = openOrders[i];
+          let symbol = order.info.symbol;
+          let closingPrice = order.price;
+          let entryPrice = order.average;
+          let side = order.id.side;
+          let amount = order.amount;
+          let filled = order.filled;
+          let remaining = order.remaining;
+          let isReduceOnly = order.reduceOnly;
+
+          let trade;
+          let tradeAction = isReduceOnly ? " CLOSE " : " OPEN";
+          let tradeDirection = side === "BUY" ? " SHORT" : " LONG";
+          trade = "\n" + "------ " + tradeAction + symbol + tradeDirection;
+
+          console.log(trade);
+          console.log("entry price: ", entryPrice);
+          console.log("closing price: ", closingPrice);
+          console.log("amount: ", amount);
+          console.log("filled: ", filled);
+          console.log("remaining: ", remaining);
+        }
+      }
+
+      break;
+    case "closed orders":
+      console.log("fetching closed orders...");
+      let closedOrders = await connect.fetchClosedOrders();
+      if (!closedOrders.length === 0) {
+        console.log("no orders closed!");
+      } else {
+        for (const i in closedOrders) {
+          let order = closedOrders[i];
+          let symbol = order.info.symbol;
+          let closingPrice = order.price;
+          let entryPrice = order.average;
+          let side = order.info.side;
+          let amount = order.amount;
+          let filled = order.filled;
+          let remaining = order.remaining;
+          let isReduceOnly = order.reduceOnly;
+
+          let trade;
+          let tradeDirection = side === "BUY" ? " SHORT" : " LONG";
+          trade = "\n" + "------ " + symbol + " " + side;
+
+          console.log(trade);
+          console.log("entry price: ", entryPrice);
+          console.log("closing price: ", closingPrice);
+          console.log("reduce only? ", isReduceOnly);
+          console.log("amount: ", amount);
+          console.log("filled: ", filled);
+          console.log("remaining: ", remaining);
+        }
+      }
+
       break;
     case "open positions":
-      //do the thing
+      console.log("fetching open positions...");
+      let positions = await connect.fetchPositions();
+      for (const i in positions) {
+        let position = positions[i];
+        let side = position.info.side === "Buy" ? "LONG" : "SHORT";
+        let symbol = position.symbol;
+
+        let size = position.info.size;
+        let averagePrice = position.info.avgPrice;
+        let liqPrice = position.info.liqPrice;
+        let unrealizedPnL = position.info.unrealisedPnl;
+        let realizedPnL = position.info.cumRealisedPnl;
+        let notionalValue = position.notional;
+
+        let trade = "\n" + "------ " + symbol + " " + side;
+        console.log(trade);
+        console.log("size: ", parseFloat(size));
+        console.log("notional value: ", notionalValue);
+        console.log("average price: ", parseFloat(averagePrice));
+        console.log("liquidation price: ", parseFloat(liqPrice));
+        console.log("unrealized PnL: ", parseFloat(unrealizedPnL));
+        console.log("realized PnL", parseFloat(realizedPnL));
+      }
+
       break;
   }
 }

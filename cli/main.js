@@ -137,7 +137,8 @@ export default async function main(args, flags) {
           message: "what would you like to view?",
           choices: [
             { value: "balance" },
-            { value: "order history" },
+            { value: "open orders" },
+            { value: "closed orders" },
             { value: "open positions" },
           ],
         });
