@@ -48,8 +48,8 @@ export default async function view(target) {
         for (const i in openOrders) {
           let order = openOrders[i];
           let symbol = order.info.symbol;
-          let closingPrice = order.price;
-          let entryPrice = order.average;
+          let closingPrice = order.average;
+          let entryPrice = order.price;
           let side = order.id.side;
           let amount = order.amount;
           let filled = order.filled;
@@ -80,17 +80,23 @@ export default async function view(target) {
         for (const i in closedOrders) {
           let order = closedOrders[i];
           let symbol = order.info.symbol;
-          let closingPrice = order.price;
-          let entryPrice = order.average;
+          let entryPrice = order.price;
+          let closingPrice = order.average;
           let side = order.info.side;
           let amount = order.amount;
           let filled = order.filled;
           let remaining = order.remaining;
           let isReduceOnly = order.reduceOnly;
+          let cost = order.cost;
 
           let trade;
           let tradeDirection = side === "BUY" ? " SHORT" : " LONG";
           trade = "\n" + "------ " + symbol + " " + side;
+
+          let profit = closingPrice / entryPrice;
+          profit = profit * amount;
+          profit = profit - amount;
+          profit = profit * closingPrice;
 
           console.log(trade);
           console.log("entry price: ", entryPrice);
@@ -99,6 +105,7 @@ export default async function view(target) {
           console.log("amount: ", amount);
           console.log("filled: ", filled);
           console.log("remaining: ", remaining);
+          console.log("realized PnL: ", profit);
         }
       }
 
