@@ -113,26 +113,30 @@ export default async function view(target) {
     case "open positions":
       console.log("fetching open positions...");
       let positions = await connect.fetchPositions();
-      for (const i in positions) {
-        let position = positions[i];
-        let side = position.info.side === "Buy" ? "LONG" : "SHORT";
-        let symbol = position.symbol;
+      if ((positions.length = 0)) {
+        console.log("no open positions!");
+      } else {
+        for (const i in positions) {
+          let position = positions[i];
+          let side = position.info.side === "Buy" ? "LONG" : "SHORT";
+          let symbol = position.symbol;
 
-        let size = position.info.size;
-        let averagePrice = position.info.avgPrice;
-        let liqPrice = position.info.liqPrice;
-        let unrealizedPnL = position.info.unrealisedPnl;
-        let realizedPnL = position.info.cumRealisedPnl;
-        let notionalValue = position.notional;
+          let size = position.info.size;
+          let averagePrice = position.info.avgPrice;
+          let liqPrice = position.info.liqPrice;
+          let unrealizedPnL = position.info.unrealisedPnl;
+          let realizedPnL = position.info.cumRealisedPnl;
+          let notionalValue = position.notional;
 
-        let trade = "\n" + "------ " + symbol + " " + side;
-        console.log(trade);
-        console.log("size: ", parseFloat(size));
-        console.log("notional value: ", notionalValue);
-        console.log("average price: ", parseFloat(averagePrice));
-        console.log("liquidation price: ", parseFloat(liqPrice));
-        console.log("unrealized PnL: ", parseFloat(unrealizedPnL));
-        console.log("realized PnL", parseFloat(realizedPnL));
+          let trade = "\n" + "------ " + symbol + " " + side;
+          console.log(trade);
+          console.log("size: ", parseFloat(size));
+          console.log("notional value: ", notionalValue);
+          console.log("average price: ", parseFloat(averagePrice));
+          console.log("liquidation price: ", parseFloat(liqPrice));
+          console.log("unrealized PnL: ", parseFloat(unrealizedPnL));
+          console.log("realized PnL", parseFloat(realizedPnL));
+        }
       }
 
       break;
