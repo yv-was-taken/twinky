@@ -32,98 +32,102 @@ export default async function main(args, flags) {
         break;
       case "trade":
       case "t":
-        const { exchange, market, quoteCurrency } = getConfig();
-        const tickers = await getTickers(exchange, market, quoteCurrency);
+        await (async () => {
+          const { exchange, market, quoteCurrency } = getConfig();
+          const tickers = await getTickers(exchange, market, quoteCurrency);
 
-        let symbolCheck = false;
-        let symbol;
-        while (!symbolCheck) {
-          symbol = await input({ message: "symbol? (enter for default)" });
-          symbolCheck = true;
+          let symbolCheck = false;
+          let symbol;
+          while (!symbolCheck) {
+            symbol = await input({ message: "symbol? (enter for default)" });
+            if (symbol === "exit") return;
 
-          let asset;
-          let quoteCurrency;
-          if (symbol === "") {
-            asset = config.asset;
-            quoteCurrency = config.quoteCurrency;
-          } else {
-            if (!symbol.includes("/")) {
-              asset = symbol;
+            symbolCheck = true;
+
+            let asset;
+            let quoteCurrency;
+            if (symbol === "") {
+              asset = config.asset;
               quoteCurrency = config.quoteCurrency;
             } else {
-              let symbolArr = symbol.split("/");
-              asset = symbolArr[0];
-              quoteCurrency = symbolArr[1];
+              if (!symbol.includes("/")) {
+                asset = symbol;
+                quoteCurrency = config.quoteCurrency;
+              } else {
+                let symbolArr = symbol.split("/");
+                asset = symbolArr[0];
+                quoteCurrency = symbolArr[1];
+              }
+            }
+            symbol = asset + "/" + quoteCurrency + ":" + quoteCurrency;
+            let tickerCheck = asset + quoteCurrency;
+            if (!tickers.includes(tickerCheck)) {
+              console.log(
+                tickerCheck,
+                "not found for: ",
+                exchange,
+                ".. try again",
+              );
+              symbolCheck = false;
             }
           }
-          symbol = asset + "/" + quoteCurrency + ":" + quoteCurrency;
-          let tickerCheck = asset + quoteCurrency;
-          if (!tickers.includes(tickerCheck)) {
-            console.log(
-              tickerCheck,
-              "not found for: ",
-              exchange,
-              ".. try again",
+          console.log("trading:", symbol);
+
+          let type = await select({
+            message: "order type?",
+            choices: [{ value: "market" }, { value: "limit" }],
+          });
+          let side = await select({
+            message: "long or short?",
+            choices: [
+              { name: "long", value: "buy" },
+              { name: "short", value: "sell" },
+            ],
+          });
+          let amountCheck = false;
+          let amount;
+          while (!amountCheck) {
+            amount = parseFloat(await input({ message: "order size?" }));
+            amountCheck = true;
+            if (!amount) {
+              console.log("amount cannot be blank.");
+              amountCheck = false;
+            }
+          }
+
+          let price;
+          if (type === "limit") price = await input({ message: "price?" });
+
+          let isStop = await confirm({ message: "stop loss?" });
+          let stopLossPrice;
+          if (isStop)
+            stopLossPrice = parseFloat(await input({ message: "stop price?" }));
+
+          let isTakeProfit = await confirm({ message: "take profit?" });
+          let takeProfitPrice;
+          if (isTakeProfit)
+            takeProfitPrice = parseFloat(
+              await input({ message: "take profit?" }),
             );
-            symbolCheck = false;
-          }
-        }
-        console.log("trading:", symbol);
+          let isReduce = await confirm({ message: "reduce only?" });
 
-        let type = await select({
-          message: "order type?",
-          choices: [{ value: "market" }, { value: "limit" }],
-        });
-        let side = await select({
-          message: "long or short?",
-          choices: [
-            { name: "long", value: "buy" },
-            { name: "short", value: "sell" },
-          ],
-        });
-        let amountCheck = false;
-        let amount;
-        while (!amountCheck) {
-          amount = parseFloat(await input({ message: "order size?" }));
-          amountCheck = true;
-          if (!amount) {
-            console.log("amount cannot be blank.");
-            amountCheck = false;
-          }
-        }
+          let params = {};
+          if (isReduce) params.type = "reduce-only";
+          if (isStop) params.stopLossPrice = stopLossPrice;
+          if (isTakeProfit) params.takeProfitPrice = takeProfitPrice;
 
-        let price;
-        if (type === "limit") price = await input({ message: "price?" });
+          await trade({
+            _exchange: exchange,
+            symbol: symbol,
+            type: type,
+            side: side,
+            amount: amount,
+            price: price,
+            params: params,
+          });
 
-        let isStop = await confirm({ message: "stop loss?" });
-        let stopLossPrice;
-        if (isStop)
-          stopLossPrice = parseFloat(await input({ message: "stop price?" }));
-
-        let isTakeProfit = await confirm({ message: "take profit?" });
-        let takeProfitPrice;
-        if (isTakeProfit)
-          takeProfitPrice = parseFloat(
-            await input({ message: "take profit?" }),
-          );
-        let isReduce = await confirm({ message: "reduce only?" });
-
-        let params = {};
-        if (isReduce) params.type = "reduce-only";
-        if (isStop) params.stopLossPrice = stopLossPrice;
-        if (isTakeProfit) params.takeProfitPrice = takeProfitPrice;
-
-        await trade({
-          _exchange: exchange,
-          symbol: symbol,
-          type: type,
-          side: side,
-          amount: amount,
-          price: price,
-          params: params,
-        });
-
-        //trade thing
+          //trade thing
+        })();
         break;
 
       case "listen":
@@ -133,54 +137,69 @@ export default async function main(args, flags) {
         break;
       case "view":
       case "v":
-        const target = await select({
-          message: "what would you like to view?",
-          choices: [
-            { value: "balance" },
-            { value: "open orders" },
-            { value: "closed orders" },
-            { value: "open positions" },
-          ],
-        });
-        await view(target);
+        await (async () => {
+          const target = await select({
+            message: "what would you like to view?",
+            choices: [
+              { value: "balance" },
+              { value: "open orders" },
+              { value: "closed orders" },
+              { value: "open positions" },
+              { value: "back" },
+            ],
+          });
+          if (target === "back") return;
+          await view(target);
+        })();
         break;
       case "settings":
       case "s":
-        let configAction = await select({
-          message: "config actions: ",
-          choices: [{ value: "view" }, { value: "modify" }],
-        });
-        switch (configAction) {
-          case "view":
-            let answer = await confirm({ message: "view config?" });
-            if (answer) console.log(await getConfig());
-            answer = await confirm({ message: "view env?" });
-            if (answer) console.log(await getEnv());
-            break;
-          case "modify":
-            const option = await select({
-              message: "what would you like to modify?",
-              choices: [{ value: "config" }, { value: "env" }],
-            });
-            switch (option) {
-              case "config":
-                await verifyConfig({});
-                break;
-              case "env":
-                const exchange = await select({
-                  message: "",
-                  choices: exchanges,
-                });
-                const envChoice = await select({
-                  message: "",
-                  choices: [{ value: "apiKey" }, { value: "apiSecret" }],
-                });
-                const envResponse = await input({ message: "new value: " });
-                await setEnv({ exchange: exchange, [envChoice]: envResponse });
-            }
+        await (async () => {
+          let configAction = await select({
+            message: "config actions: ",
+            choices: [
+              { value: "view" },
+              { value: "modify" },
+              { value: "back" },
+            ],
+          });
+          if (configAction === "back") return;
+          switch (configAction) {
+            case "view":
+              let answer = await confirm({ message: "view config?" });
+              if (answer) console.log(await getConfig());
+              answer = await confirm({ message: "view env?" });
+              if (answer) console.log(await getEnv());
+              break;
+            case "modify":
+              const option = await select({
+                message: "what would you like to modify?",
+                choices: [{ value: "config" }, { value: "env" }],
+              });
+              switch (option) {
+                case "config":
+                  await verifyConfig({});
+                  break;
+                case "env":
+                  const exchange = await select({
+                    message: "",
+                    choices: exchanges,
+                  });
+                  const envChoice = await select({
+                    message: "",
+                    choices: [{ value: "apiKey" }, { value: "apiSecret" }],
+                  });
+                  const envResponse = await input({ message: "new value: " });
+                  await setEnv({
+                    exchange: exchange,
+                    [envChoice]: envResponse,
+                  });
+              }
 
-            break;
-        }
+              break;
+          }
+        })();
+
         break;
       case "exit":
         console.log("bye!");
