@@ -113,7 +113,7 @@ export default async function view(target) {
     case "open positions":
       console.log("fetching open positions...");
       let positions = await connect.fetchPositions();
-      if ((positions.length = 0)) {
+      if (positions.length === 0) {
         console.log("no open positions!");
       } else {
         for (const i in positions) {

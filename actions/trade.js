@@ -1,8 +1,8 @@
 import ccxt from "ccxt";
-import { getConfig, getEnv } from "../utils/index.cjs";
+import { getConfig, getEnv, sleep } from "../utils/index.cjs";
 
 export default async function trade({
-  _exchange,
+  connect,
   symbol,
   type,
   side,
@@ -10,22 +10,8 @@ export default async function trade({
   price,
   params,
 }) {
-  const env = getEnv();
-  const leverage = getConfig().leverage;
-  const exchange = _exchange ?? getConfig().exchange;
-  const exchangeClass = ccxt[exchange];
-  const connect = new exchangeClass({
-    apiKey: env[exchange].API_KEY,
-    secret: env[exchange].API_SECRET,
-  });
-
   console.log("placing trade...");
   try {
-    //set leverage,
-    //throws err if leverage is already set to the same number
-    try {
-      await connect.setLeverage(leverage, symbol);
-    } catch {}
     const response = await connect.createOrder(
       symbol,
       type,
@@ -34,7 +20,6 @@ export default async function trade({
       price,
       params,
     );
-    console.log("trade placed!");
     console.log(
       `\n${amount} of ${symbol} ${type} ${side} placed successfully.`,
     );

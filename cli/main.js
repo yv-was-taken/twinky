@@ -1,5 +1,13 @@
 import { input, select, confirm } from "@inquirer/prompts";
-import { getConfig, setConfig, getEnv, setEnv } from "../utils/index.cjs";
+import ccxt from "ccxt";
+import {
+  getConfig,
+  setConfig,
+  getEnv,
+  setEnv,
+  distributeNumbers,
+  sleep,
+} from "../utils/index.cjs";
 import {
   exchanges,
   markets,
@@ -13,6 +21,20 @@ import { verifySettings, verifyConfig } from "./verifySettings.mjs";
 
 export default async function main(args, flags) {
   const config = getConfig();
+  const env = getEnv();
+  const exchange = getConfig().exchange;
+  const exchangeClass = ccxt[exchange];
+  const connect = new exchangeClass({
+    apiKey: env[exchange].API_KEY,
+    secret: env[exchange].API_SECRET,
+  });
+  const leverage = getConfig().leverage;
+  //set leverage,
+  //throws err if leverage is already set to the same number
+  try {
+    await connect.setLeverage(leverage, symbol);
+  } catch {}
+
   console.log(cli.help);
   while (true) {
     console.log(
@@ -77,6 +99,21 @@ export default async function main(args, flags) {
             message: "order type?",
             choices: [{ value: "market" }, { value: "limit" }],
           });
+
+          let executionPrices;
+          let executionStyle;
+          if (type === "limit") {
+            executionStyle = await select({
+              message: "execution style?",
+              choices: [{ value: "point" }, { value: "range" }],
+            });
+            if (executionStyle === "range") {
+              let from = parseFloat(await input({ message: "from?" }));
+              let to = parseFloat(await input({ message: "to?" }));
+              let iterations = await input({ message: "iterations?" });
+              executionPrices = distributeNumbers(from, to, iterations);
+            }
+          }
           let side = await select({
             message: "long or short?",
             choices: [
@@ -96,7 +133,8 @@ export default async function main(args, flags) {
           }
 
           let price;
-          if (type === "limit") price = await input({ message: "price?" });
+          if (type === "limit" && executionStyle === "point")
+            price = await input({ message: "price?" });
 
           let isStop = await confirm({ message: "stop loss?" });
           let stopLossPrice;
@@ -116,15 +154,34 @@ export default async function main(args, flags) {
           if (isStop) params.stopLossPrice = stopLossPrice;
           if (isTakeProfit) params.takeProfitPrice = takeProfitPrice;
 
-          await trade({
-            _exchange: exchange,
-            symbol: symbol,
-            type: type,
-            side: side,
-            amount: amount,
-            price: price,
-            params: params,
-          });
+          if (executionPrices) {
+            let a = 0;
+            await Promise.all(
+              executionPrices.map(async (executionPrice) => {
+                await trade({
+                  connect: connect,
+                  symbol: symbol,
+                  type: type,
+                  side: side,
+                  amount: amount / executionPrices.length,
+                  price: executionPrice,
+                  params: params,
+                });
+                if (a === 10) await sleep(1000);
+                a === 0;
+              }),
+            );
+          } else {
+            await trade({
+              _exchange: exchange,
+              symbol: symbol,
+              type: type,
+              side: side,
+              amount: amount,
+              price: price,
+              params: params,
+            });
+          }
 
           //trade thing
         })();
