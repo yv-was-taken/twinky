@@ -1,5 +1,5 @@
 import ccxt from "ccxt";
-import { getConfig, getEnv, sleep } from "../utils/index.cjs";
+import { getConfig, getEnv } from "../utils/index.cjs";
 
 export default async function trade({
   connect,
@@ -9,8 +9,9 @@ export default async function trade({
   amount,
   price,
   params,
+  isVerbose = false,
 }) {
-  console.log("placing trade...");
+  if (isVerbose) console.log("placing trade...");
   try {
     const response = await connect.createOrder(
       symbol,
@@ -20,9 +21,10 @@ export default async function trade({
       price,
       params,
     );
-    console.log(
-      `\n${amount} of ${symbol} ${type} ${side} placed successfully.`,
-    );
+    if (isVerbose)
+      console.log(
+        `\n${amount} of ${symbol} ${type} ${side} placed successfully.`,
+      );
 
     return;
   } catch (e) {

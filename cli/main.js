@@ -7,6 +7,7 @@ import {
   setEnv,
   distributeNumbers,
   sleep,
+  splitBy,
 } from "../utils/index.cjs";
 import {
   exchanges,
@@ -155,22 +156,27 @@ export default async function main(args, flags) {
           if (isTakeProfit) params.takeProfitPrice = takeProfitPrice;
 
           if (executionPrices) {
-            let a = 0;
-            await Promise.all(
-              executionPrices.map(async (executionPrice) => {
-                await trade({
-                  connect: connect,
-                  symbol: symbol,
-                  type: type,
-                  side: side,
-                  amount: amount / executionPrices.length,
-                  price: executionPrice,
-                  params: params,
-                });
-                if (a === 10) await sleep(1000);
-                a === 0;
-              }),
-            );
+            let splitPricesIntoChunks = splitBy(executionPrices, 10);
+            console.log("\nplacing trades...");
+            for (let i = 0; i < splitPricesIntoChunks.length; i++) {
+              await Promise.all(
+                splitPricesIntoChunks[i].map(async (executionPrice) => {
+                  await trade({
+                    connect: connect,
+                    symbol: symbol,
+                    type: type,
+                    side: side,
+                    amount: amount / executionPrices.length,
+                    price: executionPrice,
+                    params: params,
+                  });
+                }),
+
+                //avoid rate limiting
+                await sleep(1000),
+              );
+            }
+            console.log("trades placed!");
           } else {
             await trade({
               _exchange: exchange,
