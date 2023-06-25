@@ -156,9 +156,26 @@ export default async function main(args, flags) {
           let isReduce = await confirm({ message: "reduce only?" });
 
           let params = {};
-          if (isReduce) params.type = "reduce-only";
-          if (isStop) params.stopLossPrice = stopLossPrice;
-          if (isTakeProfit) params.takeProfitPrice = takeProfitPrice;
+          if (isReduce) params.reduceOnly = true;
+          //   if (isStop) {
+          //       params.stopLoss = {
+          //           "type": "market",
+          //           "triggerPrice": stopLossPrice
+
+          //       }
+          //   }
+          //   if (isTakeProfit) {
+          //       params.takeProfit = {
+          //           "type": "market",
+          //           "triggerPrice": takeProfitPrice
+          //       }
+          //   }
+          if (isStop) {
+            params.stopLoss = stopLossPrice;
+          }
+          if (isTakeProfit) {
+            params.takeProfit = takeProfitPrice;
+          }
 
           if (executionPrices) {
             let splitPricesIntoChunks = splitBy(executionPrices, 10);
