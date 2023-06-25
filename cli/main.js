@@ -101,19 +101,12 @@ export default async function main(args, flags) {
             choices: [{ value: "market" }, { value: "limit" }],
           });
 
-          let executionPrices;
           let executionStyle;
           if (type === "limit") {
             executionStyle = await select({
               message: "execution style?",
               choices: [{ value: "point" }, { value: "range" }],
             });
-            if (executionStyle === "range") {
-              let from = parseFloat(await input({ message: "from?" }));
-              let to = parseFloat(await input({ message: "to?" }));
-              let iterations = await input({ message: "iterations?" });
-              executionPrices = distributeNumbers(from, to, iterations);
-            }
           }
           let side = await select({
             message: "long or short?",
@@ -134,9 +127,21 @@ export default async function main(args, flags) {
           }
 
           let price;
-          if (type === "limit" && executionStyle === "point")
+          let executionPrices;
+          let scale;
+          if (executionStyle === "point")
             price = await input({ message: "price?" });
+          if (executionStyle === "range") {
+            let from = parseFloat(await input({ message: "from?" }));
+            let to = parseFloat(await input({ message: "to?" }));
+            let iterations = await input({ message: "iterations?" });
+            executionPrices = distributeNumbers(from, to, iterations);
 
+            scale = await select({
+              message: "range sizing distribution?",
+              choices: [{ value: "linear" }, { value: "exponential" }],
+            });
+          }
           let isStop = await confirm({ message: "stop loss?" });
           let stopLossPrice;
           if (isStop)
@@ -146,7 +151,7 @@ export default async function main(args, flags) {
           let takeProfitPrice;
           if (isTakeProfit)
             takeProfitPrice = parseFloat(
-              await input({ message: "take profit?" }),
+              await input({ message: "take profit price?" }),
             );
           let isReduce = await confirm({ message: "reduce only?" });
 
@@ -158,15 +163,36 @@ export default async function main(args, flags) {
           if (executionPrices) {
             let splitPricesIntoChunks = splitBy(executionPrices, 10);
             console.log("\nplacing trades...");
+            let amountPerIteration = amount / executionPrices.length;
+            let j = 1;
+            let amountPerIterationExp;
+            let lastAmount = 0;
+            let currentAmount = 0;
+
             for (let i = 0; i < splitPricesIntoChunks.length; i++) {
               await Promise.all(
                 splitPricesIntoChunks[i].map(async (executionPrice) => {
+                  if (scale === "exponential") {
+                    amountPerIterationExp = amountPerIteration * j * j;
+                    amountPerIterationExp =
+                      amountPerIterationExp / executionPrices.length;
+                    amountPerIterationExp =
+                      Math.round(amountPerIterationExp * 10) / 10;
+                    currentAmount = amountPerIterationExp;
+                    amountPerIterationExp = currentAmount - lastAmount;
+                    lastAmount = currentAmount;
+                    j++;
+                  }
+
                   await trade({
                     connect: connect,
                     symbol: symbol,
                     type: type,
                     side: side,
-                    amount: amount / executionPrices.length,
+                    amount:
+                      scale === "exponential"
+                        ? amountPerIterationExp
+                        : amountPerIteration,
                     price: executionPrice,
                     params: params,
                   });
@@ -179,6 +205,7 @@ export default async function main(args, flags) {
             console.log("trades placed!");
           } else {
             await trade({
+              connect: connect,
               _exchange: exchange,
               symbol: symbol,
               type: type,
