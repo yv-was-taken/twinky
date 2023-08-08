@@ -289,17 +289,15 @@ export default async function main(args, flags) {
                   break;
                 case "env":
                   const exchange = await select({
-                    message: "",
+                    message: "exchange?",
                     choices: exchanges,
                   });
-                  const envChoice = await select({
-                    message: "",
-                    choices: [{ value: "apiKey" }, { value: "apiSecret" }],
-                  });
-                  const envResponse = await input({ message: "new value: " });
+                  const newApiKey = await input({ message: "API Key:" });
+                  const newApiSecret = await input({ message: "API Secret:" });
                   await setEnv({
                     exchange: exchange,
-                    [envChoice]: envResponse,
+                    apiKey: newApiKey,
+                    apiSecret: newApiSecret,
                   });
               }
 
