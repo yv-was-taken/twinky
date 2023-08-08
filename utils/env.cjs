@@ -1,11 +1,6 @@
 const fs = require("fs");
 function setEnv({ exchange, apiKey, apiSecret }) {
-  const currentEnv = getEnv()[exchange];
-  const currentKey = currentEnv.API_KEY;
-  const currentSecret = currentEnv.API_SECRET;
-  const key = apiKey ?? currentKey;
-  const secret = apiSecret ?? currentSecret;
-  if (!key || !secret) {
+  if (!apiKey || !apiSecret) {
     console.log(
       "error: key and secret both have to be defined. please try again",
     );
@@ -13,8 +8,8 @@ function setEnv({ exchange, apiKey, apiSecret }) {
   }
   const env = {
     [exchange]: {
-      API_KEY: key,
-      API_SECRET: secret,
+      API_KEY: apiKey,
+      API_SECRET: apiSecret,
     },
   };
   fs.writeFileSync(".env.json", JSON.stringify(env, null, 2));

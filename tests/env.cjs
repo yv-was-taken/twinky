@@ -6,13 +6,16 @@ const { setEnv, getEnv } = require("../utils/env.cjs");
 describe("setEnv", () => {
   it("should set the environment variable", () => {
     const apiKey = "your-api-key";
+    const apiSecret = "your-secret-is-safe-with-me";
+    const exchange = "test-exchange";
 
-    setEnv(apiKey);
+    setEnv({ exchange: exchange, apiKey: apiKey, apiSecret: apiSecret });
 
     const envFileContent = fs.readFileSync(".env.json", "utf8");
     const env = JSON.parse(envFileContent);
 
-    expect(env.API_KEY).to.equal(apiKey);
+    expect(env[exchange].API_KEY).to.equal(apiKey);
+    expect(env[exchange].API_SECRET).to.equal(apiSecret);
   });
 });
 

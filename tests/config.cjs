@@ -18,16 +18,14 @@ describe("setConfig", () => {
   it("should set config with default values when isDefault is true", async () => {
     const expectedConfig = {
       exchange: "bybit",
+      leverage: 10,
       market: "perp",
       quoteCurrency: "USDT",
       asset: "BTC",
     };
 
-    await setConfig({ isDefault: true });
-    const configFileContent = JSON.parse(
-      fs.readFileSync(".blinkConfig.json", "utf8"),
-    );
-
+    setConfig({ isDefault: true });
+    const configFileContent = getConfig();
     expect(configFileContent).to.deep.equal(expectedConfig);
   });
 
@@ -62,12 +60,20 @@ describe("getConfig", () => {
       market: "perp",
       quoteCurrency: "USDT",
       asset: "BTC",
+      leverage: 10,
     };
 
-    fs.writeFileSync(
-      ".blinkConfig.json",
-      JSON.stringify(expectedConfig, null, 2),
-    );
+    // fs.writeFileSync(
+    //     ".blinkConfig.json",
+    //     JSON.stringify(expectedConfig, null, 2),
+    // );
+    setConfig({
+      exchange: expectedConfig.exchange,
+      market: expectedConfig.market,
+      quoteCurrency: expectedConfig.quoteCurrency,
+      asset: expectedConfig.asset,
+      leverage: expectedConfig.leverage,
+    });
 
     const config = getConfig();
 

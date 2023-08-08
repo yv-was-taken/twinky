@@ -6,36 +6,27 @@ chai.use(chaiExec);
 
 describe("command line flags", () => {
   it("should display help message when --help flag is passed", () => {
-    const helpMessage = `
-                 Blink: Crypto Trading API Modular CLI Suite
+    const helpMessage = ` Blink: Crypto Trading API Modular CLI Suite
 
-  Usage:
-      $ blink <action> <subcommands> [flags]:wq
+  actions:
+          -trade(t)
+          --> execute trades.
 
+          -listen(l)
+          --> listen for and log portfolio updates in real time.
 
-  TRADE COMMANDS
-     long/short <market/limit> <ticker> <size> <@price (if limit)>
-  TRADE FLAGS
-     --chase: fill at the next possible tick in the order book with limit order. fill or kill
-     --scale: <model> <@low> <@high>: spread your order out within a range
-  CORE COMMANDS
-     trade: execute orders on the market
-     port: inspect market data (open positions)
+          -view(v)
+          --> view portfolio, open orders, order history.
 
-  Example:
-      $ blink long market btcusdt binance 1
-      $ blink short limit ethusdt binance 10 @2500 --chase
-      $ blink long limit ethusdt binance @0.1 //spread
-      $ blink long limit ethusdt bybit 10 layer linear @1920 @2080
-      $ blink close all
+          -settings(s)
+          --> view/modify config settings.
 
-      you can also omit certain options and blink will prompt you with the rest!
+          -help(h)
+          --> log this message.
 
-      $ blink open 
-         > select direction
-         >   - long
-         >   - short
-                 `;
+          -exit
+          --> exit the program.
+`;
     const command = chaiExec("node index.mjs --help");
     chai.expect(command.stdout.trim()).to.contain(helpMessage.trim());
   });

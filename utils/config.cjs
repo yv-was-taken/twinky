@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-async function setConfig({
+function setConfig({
   exchange,
   market,
   quoteCurrency,
@@ -25,7 +25,10 @@ async function setConfig({
   }
 
   if (isDefault) {
-    fs.writeFileSync(".blinkConfig.json", JSON.stringify(config, null, 2));
+    fs.writeFileSync(
+      ".blinkConfig.json",
+      JSON.stringify(defaultConfig, null, 2),
+    );
   } else {
     if (exchange) config.exchange = exchange;
     if (market) config.market = market;
