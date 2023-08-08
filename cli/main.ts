@@ -8,33 +8,35 @@ import {
   distributeNumbers,
   sleep,
   splitBy,
-} from "../utils/index.cjs";
+} from "../utils/index";
 import {
   exchanges,
   markets,
   quoteCurrencies,
   getTickers,
-} from "../options/index.mjs";
-import { cli } from "../parse/index.mjs";
-import trade from "../actions/trade.js";
-import view from "../actions/view.js";
-import { verifySettings, verifyConfig } from "./verifySettings.mjs";
+} from "../options/index";
+import { cli } from "../parse/index";
+import trade from "../actions/trade";
+import view from "../actions/view";
+import { verifySettings, verifyConfig } from "./verifySettings";
 
-export default async function main(args, flags) {
+type Props = {
+  args: string[];
+  flags: {
+    action: string;
+  };
+};
+
+export default async function main({ args, flags }: Props) {
   const config = getConfig();
   const env = getEnv();
   const exchange = getConfig().exchange;
+  //@ts-ignore
   const exchangeClass = ccxt[exchange];
   const connect = new exchangeClass({
     apiKey: env[exchange].API_KEY,
     secret: env[exchange].API_SECRET,
   });
-  const leverage = getConfig().leverage;
-  //set leverage,
-  //throws err if leverage is already set to the same number
-  try {
-    await connect.setLeverage(leverage, symbol);
-  } catch {}
 
   console.log(cli.help);
   while (true) {
@@ -60,7 +62,7 @@ export default async function main(args, flags) {
           const tickers = await getTickers(exchange, market, quoteCurrency);
 
           let symbolCheck = false;
-          let symbol;
+          let symbol: string | undefined;
           while (!symbolCheck) {
             symbol = await input({ message: "symbol? (enter for default)" });
             if (symbol === "exit") return;
@@ -94,6 +96,29 @@ export default async function main(args, flags) {
               symbolCheck = false;
             }
           }
+          let leverage;
+          const isDefaultLeverage = await confirm({
+            message: "use default leverage?",
+          });
+          if (isDefaultLeverage) {
+            leverage = getConfig().leverage;
+          } else {
+            let leverageCheck = true;
+            while (leverageCheck) {
+              try {
+                leverage = parseFloat(await input({ message: "leverage?" }));
+                leverageCheck = false;
+              } catch (err) {
+                console.log("input must be a number, please try again.");
+                leverageCheck = true;
+              }
+            }
+          }
+          //throws err if leverage is already set to the same number
+          try {
+            await connect.setLeverage(leverage, symbol);
+          } catch {}
+
           console.log("trading:", symbol);
 
           let type = await select({
@@ -116,25 +141,29 @@ export default async function main(args, flags) {
             ],
           });
           let amountCheck = false;
-          let amount;
+          let amount: number | undefined;
           while (!amountCheck) {
-            amount = parseFloat(await input({ message: "order size?" }));
-            amountCheck = true;
-            if (!amount) {
-              console.log("amount cannot be blank.");
-              amountCheck = false;
+            try {
+              amount = parseFloat(await input({ message: "order size?" }));
+              amountCheck = true;
+              if (!amount) {
+                console.log("amount cannot be blank.");
+                amountCheck = false;
+              }
+            } catch (err) {
+              console.log("input must be a number. please try again.");
             }
           }
 
           let price;
           let executionPrices;
-          let scale;
+          let scale: "linear" | "exponential";
           if (executionStyle === "point")
-            price = await input({ message: "price?" });
+            price = parseFloat(await input({ message: "price?" }));
           if (executionStyle === "range") {
             let from = parseFloat(await input({ message: "from?" }));
             let to = parseFloat(await input({ message: "to?" }));
-            let iterations = await input({ message: "iterations?" });
+            let iterations = parseInt(await input({ message: "iterations?" }));
             executionPrices = distributeNumbers(from, to, iterations);
 
             scale = await select({
@@ -155,7 +184,8 @@ export default async function main(args, flags) {
             );
           let isReduce = await confirm({ message: "reduce only?" });
 
-          let params = {};
+          //@todo add strict typing
+          let params: any = {};
           if (isReduce) params.reduceOnly = true;
           //   if (isStop) {
           //       params.stopLoss = {
@@ -180,15 +210,17 @@ export default async function main(args, flags) {
           if (executionPrices) {
             let splitPricesIntoChunks = splitBy(executionPrices, 10);
             console.log("\nplacing trades...");
+            //@ts-ignore
+            //cannot be undefined as determined from var defining above
             let amountPerIteration = amount / executionPrices.length;
             let j = 1;
-            let amountPerIterationExp;
+            let amountPerIterationExp: number;
             let lastAmount = 0;
             let currentAmount = 0;
 
             for (let i = 0; i < splitPricesIntoChunks.length; i++) {
               await Promise.all(
-                splitPricesIntoChunks[i].map(async (executionPrice) => {
+                splitPricesIntoChunks[i].map(async (executionPrice: number) => {
                   if (scale === "exponential") {
                     amountPerIterationExp = amountPerIteration * j * j;
                     amountPerIterationExp =
@@ -216,6 +248,7 @@ export default async function main(args, flags) {
                 }),
 
                 //avoid rate limiting
+                //@ts-ignore ts wants Promise.all to only accept one argument for some reason
                 await sleep(1000),
               );
             }
@@ -223,7 +256,7 @@ export default async function main(args, flags) {
           } else {
             await trade({
               connect: connect,
-              _exchange: exchange,
+              // _exchange: exchange,
               symbol: symbol,
               type: type,
               side: side,

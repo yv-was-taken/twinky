@@ -59,6 +59,7 @@ const cli = meow(
       from: {
         type: "number",
         shortflag: "f",
+        //@ts-ignore
         isRequired: (flags, inputs) => {
           if (flags.scale) {
             return true;
@@ -69,6 +70,7 @@ const cli = meow(
       to: {
         type: "number",
         shortflag: "t",
+        //@ts-ignore
         isRequired: (flags, inputs) => {
           if (flags.scale) {
             return true;

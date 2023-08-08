@@ -10,7 +10,12 @@ export const quoteCurrencies = {
   },
 };
 
-export async function getTickers(exchange, market, quoteCurrency) {
+type Props = {
+  exchange: string;
+  market: string;
+  quoteCurrency: string;
+};
+export async function getTickers({ exchange, market, quoteCurrency }: Props) {
   if (exchange === "bybit") {
     let category;
     switch (market) {
@@ -27,10 +32,10 @@ export async function getTickers(exchange, market, quoteCurrency) {
 
     const api = `https://api.bybit.com/v5/market/instruments-info?category=${category}`;
     let tickers = await fetch(api)
-      .then((resp) => resp.json())
-      .then((json) => json.result.list);
+      .then((resp: any) => resp.json())
+      .then((json: any) => json.result.list);
     return tickers
-      .map((item) => item.symbol)
-      .filter((ticker) => ticker.includes(quoteCurrency));
+      .map((item: any) => item.symbol)
+      .filter((ticker: string) => ticker.includes(quoteCurrency));
   }
 }

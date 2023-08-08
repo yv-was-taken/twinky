@@ -1,18 +1,18 @@
-const chai = require("chai");
-const fs = require("fs");
-const { setConfig, getConfig } = require("../utils/config.cjs");
+import * as chai from "chai";
+import * as fs from "fs";
+import { setConfig, getConfig } from "../utils/config";
 
 const expect = chai.expect;
 
 describe("setConfig", () => {
   beforeEach(() => {
     // Clear the config file before each test
-    fs.writeFileSync(".blinkConfig.json", JSON.stringify({}, null, 2));
+    fs.writeFileSync(".json", JSON.stringify({}, null, 2));
   });
 
   afterEach(() => {
     // Clean up the config file after each test
-    fs.unlinkSync(".blinkConfig.json");
+    fs.unlinkSync(".json");
   });
 
   it("should set config with default values when isDefault is true", async () => {

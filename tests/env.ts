@@ -1,7 +1,7 @@
-const fs = require("fs");
-const { expect } = require("chai");
+import * as fs from "fs";
+import { expect } from "chai";
 
-const { setEnv, getEnv } = require("../utils/env.cjs");
+import { setEnv, getEnv } from "../utils/env";
 
 describe("setEnv", () => {
   it("should set the environment variable", () => {

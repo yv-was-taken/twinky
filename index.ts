@@ -1,10 +1,10 @@
-import { verifySettings } from "./cli/verifySettings.mjs";
-import main from "./cli/main.js";
-import { inputs, flags } from "./parse/cli.mjs";
+import { verifySettings } from "./cli/verifySettings";
+import main from "./cli/main";
+import { inputs, flags } from "./parse/cli";
 
 async function app() {
   await verifySettings({ initialConfig: true, initialEnv: true });
-  await main(inputs, flags);
+  await main({ args: inputs, flags: flags });
 }
 
 app();

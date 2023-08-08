@@ -1,10 +1,11 @@
 import ccxt from "ccxt";
-import { getConfig, getEnv } from "../utils/index.cjs";
+import { getConfig, getEnv } from "../utils/index";
 
-export default async function view(target) {
+export default async function view(target: string) {
   const env = getEnv();
   const exchange = getConfig().exchange;
-  const exchangeClass = ccxt[exchange];
+  //@ts-ignore
+  const exchangeClass: any = ccxt[exchange]; //tricky typing
   const connect = new exchangeClass({
     apiKey: env[exchange].API_KEY,
     secret: env[exchange].API_SECRET,
@@ -14,9 +15,10 @@ export default async function view(target) {
     case "balance":
       console.log("fetching balance...");
       let balance = await connect.fetchBalance();
-      let freeBalance = {};
-      let usedBalance = {};
-      let totalBalance = {};
+      //@todo strict typing;
+      let freeBalance: any = {};
+      let usedBalance: any = {};
+      let totalBalance: any = {};
       for (const asset in balance) {
         if (balance[asset].free > 0) {
           freeBalance[asset] = freeBalance[asset]
@@ -74,7 +76,7 @@ export default async function view(target) {
     case "closed orders":
       console.log("fetching closed orders...");
       let closedOrders = await connect.fetchClosedOrders();
-      if (!closedOrders.length === 0) {
+      if (closedOrders.length === 0) {
         console.log("no orders closed!");
       } else {
         for (const i in closedOrders) {

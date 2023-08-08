@@ -1,7 +1,11 @@
-const { getConfig, setConfig } = require("./config.cjs");
-const { getEnv, setEnv } = require("./env.cjs");
+export { getConfig, setConfig } from "./config";
+export { getEnv, setEnv } from "./env";
 
-function distributeNumbers(low, high, iterations) {
+export function distributeNumbers(
+  low: number,
+  high: number,
+  iterations: number,
+) {
   const step = (high - low) / (iterations - 1);
   const result = [];
 
@@ -13,11 +17,11 @@ function distributeNumbers(low, high, iterations) {
   return result;
 }
 
-async function sleep(ms) {
+export async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function splitBy(list, chunkSize) {
+export function splitBy(list: Array<any>, chunkSize: number) {
   const result = [];
   for (let i = 0; i < list.length; i += chunkSize) {
     result.push(list.slice(i, i + chunkSize));
@@ -25,12 +29,12 @@ function splitBy(list, chunkSize) {
 
   return result;
 }
-module.exports = {
-  getConfig: getConfig,
-  setConfig: setConfig,
-  getEnv: getEnv,
-  setEnv: setEnv,
-  distributeNumbers: distributeNumbers,
-  sleep: sleep,
-  splitBy: splitBy,
-};
+//module.exports = {
+//  getConfig: getConfig,
+//  setConfig: setConfig,
+//  getEnv: getEnv,
+//  setEnv: setEnv,
+//  distributeNumbers: distributeNumbers,
+//  sleep: sleep,
+//  splitBy: splitBy,
+//};

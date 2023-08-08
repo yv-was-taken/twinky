@@ -1,5 +1,11 @@
-const fs = require("fs");
-function setEnv({ exchange, apiKey, apiSecret }) {
+import * as fs from "fs";
+
+type Props = {
+  exchange: string;
+  apiKey: string;
+  apiSecret: string;
+};
+export function setEnv({ exchange, apiKey, apiSecret }: Props) {
   if (!apiKey || !apiSecret) {
     console.log(
       "error: key and secret both have to be defined. please try again",
@@ -15,7 +21,7 @@ function setEnv({ exchange, apiKey, apiSecret }) {
   fs.writeFileSync(".env.json", JSON.stringify(env, null, 2));
 }
 
-function getEnv() {
+export function getEnv() {
   try {
     const envFileContent = fs.readFileSync(".env.json", "utf8");
     const env = JSON.parse(envFileContent);
@@ -24,8 +30,3 @@ function getEnv() {
     throw err;
   }
 }
-
-module.exports = {
-  setEnv: setEnv,
-  getEnv: getEnv,
-};

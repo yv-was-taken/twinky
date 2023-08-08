@@ -1,6 +1,16 @@
 import ccxt from "ccxt";
-import { getConfig, getEnv } from "../utils/index.cjs";
+import { getConfig, getEnv } from "../utils/index";
 
+type Props = {
+  connect: any; //tricky typing
+  symbol: string | undefined;
+  type: string;
+  side: string;
+  amount: number | undefined;
+  price: number | undefined;
+  params: any; //@todo check later
+  isVerbose?: boolean;
+};
 export default async function trade({
   connect,
   symbol,
@@ -10,7 +20,7 @@ export default async function trade({
   price,
   params,
   isVerbose = false,
-}) {
+}: Props) {
   if (isVerbose) console.log("placing trade...");
   try {
     const response = await connect.createOrder(

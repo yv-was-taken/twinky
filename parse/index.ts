@@ -1,1 +1,1 @@
-export { cli, flags, inputs } from "../parse/cli.mjs";
+export { cli, flags, inputs } from "../parse/cli";

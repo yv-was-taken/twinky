@@ -1,29 +1,37 @@
-import { getConfig, setConfig, getEnv, setEnv } from "../utils/index.cjs";
-import {
-  getTickers,
-  exchanges,
-  markets,
-  quoteCurrencies,
-} from "../options/index.mjs";
+import { getConfig, setConfig, getEnv, setEnv } from "../utils/";
+import { getTickers, exchanges, markets, quoteCurrencies } from "../options/";
 import { select, input } from "@inquirer/prompts";
 import * as fs from "fs";
 
-export async function setAsset(exchange, market, quoteCurrency) {
-  while (true) {
-    const asset = await input({ message: "asset: " });
-    const tickers = await getTickers(exchange, market, quoteCurrency);
-    if (tickers.includes(asset.toUpperCase().concat(quoteCurrency))) {
-      return asset;
-    } else {
-      console.log(
-        "asset not found for exchange: ",
-        asset.toUpperCase().concat(quoteCurrency),
-        "please try again.",
-      );
-    }
-  }
-}
+//type SetAssetProps = {
+//    exchange?: string;
+//    market?: string;
+//    quoteCurrency?: string;
+//}
+//export async function setAsset({exchange, market, quoteCurrency}: SetAssetProps) {
+//  while (true) {
+//    const asset = await input({ message: "asset: " });
+//    const tickers = await getTickers(exchange, market, quoteCurrency);
+//    if (tickers.includes(asset.toUpperCase().concat(quoteCurrency))) {
+//      return asset;
+//    } else {
+//      console.log(
+//        "asset not found for exchange: ",
+//        asset.toUpperCase().concat(quoteCurrency),
+//        "please try again.",
+//      );
+//    }
+//  }
+//}
 
+type VerifyConfigProps = {
+  initialSetup?: boolean;
+  exchange?: string;
+  market?: string;
+  quoteCurrency?: string;
+  asset?: string;
+  leverage?: number;
+};
 export async function verifyConfig({
   initialSetup = false,
   exchange,
@@ -31,29 +39,31 @@ export async function verifyConfig({
   quoteCurrency,
   asset,
   leverage,
-}) {
+}: VerifyConfigProps) {
   if (!initialSetup) {
     //     const doConfig = await confirm({
     //       message:
     //         "config not found! Would you like to set a config? (select 'no' for default values",
     //     });
-    let newExchange =
+    let newExchange: string =
       exchange ??
       (await select({
         message: "exchange: ",
         choices: exchanges,
       }));
 
-    let newMarket =
+    let newMarket: string =
       market ??
       (await select({
         message: "market: ",
+        //@ts-ignore
         choices: markets[newExchange],
       }));
-    let newQuoteCurrency =
+    let newQuoteCurrency: string =
       quoteCurrency ??
       (await select({
         message: "quote currency: ",
+        //@ts-ignore
         choices: quoteCurrencies[newExchange][newMarket],
       }));
     let assetCheck = false;
@@ -64,11 +74,11 @@ export async function verifyConfig({
         (await input({
           message: 'default asset (ex. "BTC")',
         }));
-      let assets = await getTickers(
-        newExchange ?? exchange,
-        newMarket ?? market,
-        newQuoteCurrency ?? quoteCurrency,
-      );
+      let assets = await getTickers({
+        exchange: newExchange ?? exchange,
+        market: newMarket ?? market,
+        quoteCurrency: newQuoteCurrency ?? quoteCurrency,
+      });
       assetCheck = true;
       if (
         !(assets + "/" + quoteCurrency + ":" + quoteCurrency).includes(newAsset)
@@ -89,7 +99,7 @@ export async function verifyConfig({
           }),
         );
       levCheck = true;
-      if (leverage > 10) {
+      if (leverage && leverage > 10) {
         console.log("leverage too high. try again");
         levCheck = false;
       }
@@ -108,27 +118,27 @@ export async function verifyConfig({
   } else setConfig({ isDefault: true });
 }
 
-async function verifyEnv({ initialSetup = false, newKey, newSecret }) {
+type VerifyEnvProps = {
+  newKey?: string;
+  newSecret?: string;
+};
+async function verifyEnv({ newKey, newSecret }: VerifyEnvProps) {
   const { exchange } = await getConfig();
-  if (initialSetup) {
-    try {
-      fs.readFileSync(".env.json");
-    } catch (err) {
-      console.log("Setting API config for: ", exchange);
-      const apiKey = newKey
-        ? newKey
-        : await input({
-            message: `API Key:`,
-          });
-      const apiSecret = newSecret
-        ? newSecret
-        : await input({
-            message: `API Secret:`,
-          });
-      setEnv({ exchange: exchange, apiKey: apiKey, apiSecret: apiSecret });
-    }
-  } else {
-    setEnv({ exchange: exchange, apiKey: newKey, apiSecret: newSecret });
+  try {
+    fs.readFileSync(".env.json");
+  } catch (err) {
+    console.log("Setting API config for: ", exchange);
+    const apiKey =
+      newKey ??
+      (await input({
+        message: `API Key:`,
+      }));
+    const apiSecret =
+      newSecret ??
+      (await input({
+        message: `API Secret:`,
+      }));
+    setEnv({ exchange: exchange, apiKey: apiKey, apiSecret: apiSecret });
   }
 }
 export async function verifySettings({
@@ -136,5 +146,5 @@ export async function verifySettings({
   initialEnv = false,
 }) {
   await verifyConfig({ initialSetup: initialConfig });
-  await verifyEnv({ initialSetup: initialEnv });
+  await verifyEnv({});
 }
