@@ -8,17 +8,17 @@ import {
   distributeNumbers,
   sleep,
   splitBy,
-} from "../utils/index";
+} from "../utils/index.ts";
 import {
   exchanges,
   markets,
   quoteCurrencies,
   getTickers,
-} from "../options/index";
-import { cli } from "../parse/index";
-import trade from "../actions/trade";
-import view from "../actions/view";
-import { verifySettings, verifyConfig } from "./verifySettings";
+} from "../options/index.ts";
+import { cli } from "../parse/index.ts";
+import trade from "../actions/trade.ts";
+import view from "../actions/view.ts";
+import { verifySettings, verifyConfig } from "./verifySettings.ts";
 
 type Props = {
   args: string[];
@@ -59,7 +59,11 @@ export default async function main({ args, flags }: Props) {
       case "t":
         await (async () => {
           const { exchange, market, quoteCurrency } = getConfig();
-          const tickers = await getTickers(exchange, market, quoteCurrency);
+          const tickers = await getTickers({
+            exchange: exchange,
+            market: market,
+            quoteCurrency: quoteCurrency,
+          });
 
           let symbolCheck = false;
           let symbol: string | undefined;

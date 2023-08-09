@@ -1,5 +1,5 @@
 import ccxt from "ccxt";
-import { getConfig, getEnv } from "../utils/index";
+import { getConfig, getEnv } from "../utils/index.ts";
 
 type Props = {
   connect: any; //tricky typing
@@ -37,10 +37,14 @@ export default async function trade({
       );
 
     return;
-  } catch (e) {
-    // if the exception is thrown, it is "caught" and can be handled here
-    // the handling reaction depends on the type of the exception
-    // and on the purpose or business logic of your application
+  } catch (e: any) {
+    //tricky typing, not worth the hassle
+
+    /*
+     * if the exception is thrown, it is "caught" and can be handled here
+     * the handling reaction depends on the type of the exception
+     * and on the purpose or business logic of your application
+     */
     if (e instanceof ccxt.NetworkError) {
       console.log(
         connect.id,

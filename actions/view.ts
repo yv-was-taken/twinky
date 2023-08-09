@@ -1,5 +1,5 @@
 import ccxt from "ccxt";
-import { getConfig, getEnv } from "../utils/index";
+import { getConfig, getEnv } from "../utils/index.ts";
 
 export default async function view(target: string) {
   const env = getEnv();

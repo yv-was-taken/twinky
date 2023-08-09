@@ -1,6 +1,6 @@
 import * as chai from "chai";
 import * as fs from "fs";
-import { setConfig, getConfig } from "../utils/config";
+import { setConfig, getConfig } from "../utils/config.ts";
 
 const expect = chai.expect;
 

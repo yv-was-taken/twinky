@@ -1,5 +1,5 @@
-export { getConfig, setConfig } from "./config";
-export { getEnv, setEnv } from "./env";
+export { getConfig, setConfig } from "./config.ts";
+export { getEnv, setEnv } from "./env.ts";
 
 export function distributeNumbers(
   low: number,

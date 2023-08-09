@@ -1,5 +1,10 @@
-import { getConfig, setConfig, getEnv, setEnv } from "../utils/";
-import { getTickers, exchanges, markets, quoteCurrencies } from "../options/";
+import { getConfig, setConfig, getEnv, setEnv } from "../utils/index.ts";
+import {
+  getTickers,
+  exchanges,
+  markets,
+  quoteCurrencies,
+} from "../options/index.ts";
 import { select, input } from "@inquirer/prompts";
 import * as fs from "fs";
 
@@ -122,7 +127,7 @@ type VerifyEnvProps = {
   newKey?: string;
   newSecret?: string;
 };
-async function verifyEnv({ newKey, newSecret }: VerifyEnvProps) {
+export async function verifyEnv({ newKey, newSecret }: VerifyEnvProps) {
   const { exchange } = await getConfig();
   try {
     fs.readFileSync(".env.json");

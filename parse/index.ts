@@ -1,1 +1,1 @@
-export { cli, flags, inputs } from "../parse/cli";
+export { cli, flags, inputs } from "../parse/cli.ts";

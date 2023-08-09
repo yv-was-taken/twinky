@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { expect } from "chai";
 
-import { setEnv, getEnv } from "../utils/env";
+import { setEnv, getEnv } from "../utils/env.ts";
 
 describe("setEnv", () => {
   it("should set the environment variable", () => {
