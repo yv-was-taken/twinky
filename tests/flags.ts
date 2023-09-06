@@ -1,6 +1,5 @@
-const chaiExec = require("@jsdevtools/chai-exec");
-const chai = require("chai");
-const pjson = require("../package.json");
+import chaiExec from "@jsdevtools/chai-exec";
+import * as chai from "chai";
 
 chai.use(chaiExec);
 
@@ -27,12 +26,14 @@ describe("command line flags", () => {
           -exit
           --> exit the program.
 `;
-    const command = chaiExec("node index.mjs --help");
+    const command = chaiExec("node index.ts--help");
     chai.expect(command.stdout.trim()).to.contain(helpMessage.trim());
   });
   it("should output version when --version flag is called", () => {
-    const command = chaiExec("node index.mjs --version");
-    chai.expect(command.stdout.trim()).to.equal(pjson.version);
+    const command = chaiExec("node index.ts--version");
+    chai
+      .expect(command.stdout.trim())
+      .to.equal(process.env.npm_package_version);
   });
   it("should require from and to flags when --scale flag is passed.", () => {
     const command = chaiExec("npm run start -- --scale --from 1");

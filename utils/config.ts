@@ -1,13 +1,21 @@
-const fs = require("fs");
+import * as fs from "fs";
 
-function setConfig({
+type Props = {
+  exchange?: string;
+  market?: string;
+  quoteCurrency?: string;
+  asset?: string;
+  leverage?: number;
+  isDefault?: boolean;
+};
+export function setConfig({
   exchange,
   market,
   quoteCurrency,
   asset,
   leverage,
   isDefault = false,
-}) {
+}: Props) {
   const defaultConfig = {
     exchange: "bybit",
     market: "perp",
@@ -40,7 +48,7 @@ function setConfig({
   }
 }
 
-function getConfig() {
+export function getConfig() {
   const config = JSON.parse(
     fs.readFileSync(".blinkConfig.json", { encoding: "utf8", flag: "a+" }),
   );
@@ -52,8 +60,3 @@ function getConfig() {
     leverage: config.leverage,
   };
 }
-
-module.exports = {
-  setConfig: setConfig,
-  getConfig: getConfig,
-};

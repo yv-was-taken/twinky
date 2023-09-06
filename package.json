@@ -8,12 +8,17 @@
     "chai-as-promised": "^7.1.1",
     "husky": "^8.0.3",
     "meow": "^11.0.0",
-    "mocha": "^9.2.2"
+    "pretty-quick": "^3.1.3",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.1"
   },
   "scripts": {
-    "start": "node index.mjs",
+    "start": "ts-node index.ts",
     "prepare": "husky install",
-    "test": "mocha tests/**.*js"
+    "test": "ts-mocha tests/**.*ts"
+  },
+  "lint-staged": {
+    "*": "prettier --ignore-unknown --write"
   },
   "name": "blink",
   "version": "0.1.0",
@@ -37,8 +42,12 @@
   },
   "homepage": "https://github.com/ywvlfy/blink#readme",
   "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "@types/inquirer": "^9.0.3",
+    "@types/mocha": "^10.0.1",
     "eslint": "^8.42.0",
     "husky": "^8.0.0",
-    "pretty-quick": "^3.1.3"
+    "lint-staged": "^13.2.3",
+    "prettier": "^3.0.1"
   }
 }
