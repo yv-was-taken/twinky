@@ -8,6 +8,9 @@ import {
   distributeNumbers,
   sleep,
   splitBy,
+  findArg,
+  formatSymbol,
+  checkTicker,
 } from "../utils/index.ts";
 import {
   exchanges,
@@ -23,11 +26,32 @@ import { verifySettings, verifyConfig } from "./verifySettings.ts";
 type Props = {
   args: string[];
   flags: {
-    action: string;
+    action?: string;
+    chase?: string;
+    scale?: boolean;
+    scaleType?: "linear" | "exponential";
+    from?: number;
+    to?: number;
+    type?: "market" | "limit";
+    symbol?: string;
+    stop?: number;
+    tp?: number;
+    reduce?: boolean;
+    exchange?: "bybit" /* | "binance" | "dydx" */;
+    leverage?: number;
+    price?: number;
   };
 };
 
+//@todo impl:
+//if (flags.buy && flags.sell) throw new Error(can't pass both buy and sell args)
 export default async function main({ args, flags }: Props) {
+  let leverage;
+  let action;
+  let symbol;
+  let type;
+  let executionStyle;
+  let scale;
   const config = getConfig();
   const env = getEnv();
   const exchange = getConfig().exchange;
@@ -44,7 +68,7 @@ export default async function main({ args, flags }: Props) {
       "\nselect action when ready. or type 'help' for list of actions.",
     );
 
-    const action =
+    action =
       flags.action === "none" && !args.length
         ? await input({
             message: `\n>`,
@@ -58,55 +82,61 @@ export default async function main({ args, flags }: Props) {
       case "trade":
       case "t":
         await (async () => {
-          const { exchange, market, quoteCurrency } = getConfig();
+          const { market, quoteCurrency } = getConfig();
           const tickers = await getTickers({
             exchange: exchange,
             market: market,
             quoteCurrency: quoteCurrency,
           });
 
-          let symbolCheck = false;
-          let symbol: string | undefined;
-          while (!symbolCheck) {
-            symbol = await input({ message: "symbol? (enter for default)" });
-            if (symbol === "exit") return;
-
-            symbolCheck = true;
-
-            let asset;
-            let quoteCurrency;
-            if (symbol === "") {
-              asset = config.asset;
-              quoteCurrency = config.quoteCurrency;
-            } else {
-              if (!symbol.includes("/")) {
-                asset = symbol;
-                quoteCurrency = config.quoteCurrency;
-              } else {
-                let symbolArr = symbol.split("/");
-                asset = symbolArr[0];
-                quoteCurrency = symbolArr[1];
-              }
-            }
-            symbol = asset + "/" + quoteCurrency + ":" + quoteCurrency;
-            let tickerCheck = asset + quoteCurrency;
-            if (!tickers.includes(tickerCheck)) {
-              console.log(
-                tickerCheck,
-                "not found for: ",
+          let symbol = "";
+          let tradeActionIndex: number | undefined;
+          if (!args.length) {
+            if (findArg("buy", args) || findArg("sell", args)) {
+              tradeActionIndex =
+                args.indexOf("buy") > -1
+                  ? args.indexOf("buy")
+                  : args.indexOf("sell");
+              symbol = args[tradeActionIndex + 1]; //must come after "buy/sell"
+              const formatSymbolObject = formatSymbol(
+                symbol,
+                tickers,
                 exchange,
-                ".. try again",
               );
-              symbolCheck = false;
+              if (!formatSymbolObject.isSymbolValid) {
+                throw new Error("symbol not valid, please try again.");
+              }
+              symbol = formatSymbolObject.symbol;
+            }
+          } else {
+            symbol = flags.symbol ?? "";
+          }
+
+          let symbolCheck = false;
+          if (!symbol) {
+            while (!symbolCheck) {
+              symbol = await input({ message: "symbol? (enter for default)" });
+
+              if (symbol === "exit") return;
+              const formatSymbolObject = formatSymbol(
+                symbol,
+                tickers,
+                exchange,
+              );
+              symbol = formatSymbolObject.symbol;
+              symbolCheck = formatSymbolObject.isSymbolValid;
+              //symbolCheck = checkTicker(asset, quoteCurrency, tickers, exchange);
             }
           }
-          let leverage;
-          const isDefaultLeverage = await confirm({
-            message: "use default leverage?",
-          });
+
+          const isDefaultLeverage =
+            flags.leverage ??
+            (await confirm({
+              message: "use default leverage?",
+            }));
           if (isDefaultLeverage) {
             leverage = getConfig().leverage;
-          } else {
+          } else if (!flags.leverage) {
             let leverageCheck = true;
             while (leverageCheck) {
               try {
@@ -125,25 +155,44 @@ export default async function main({ args, flags }: Props) {
 
           console.log("trading:", symbol);
 
-          let type = await select({
-            message: "order type?",
-            choices: [{ value: "market" }, { value: "limit" }],
-          });
+          let type;
+
+          if (flags.type) {
+            args = flags.type;
+          }
+          if (tradeActionIndex) {
+            if (
+              args[tradeActionIndex + 2] === "market" ||
+              args[tradeActionIndex] + 2 === "limit"
+            ) {
+              type = args[tradeActionIndex + 2];
+            }
+          }
+          if (!type) {
+            type = await select({
+              message: "order type?",
+              choices: [{ value: "market" }, { value: "limit" }],
+            });
+          }
 
           let executionStyle;
           if (type === "limit") {
-            executionStyle = await select({
-              message: "execution style?",
-              choices: [{ value: "point" }, { value: "range" }],
-            });
+            executionStyle = flags.scale
+              ? "range"
+              : await select({
+                  message: "execution style?",
+                  choices: [{ value: "point" }, { value: "range" }],
+                });
           }
-          let side = await select({
-            message: "long or short?",
-            choices: [
-              { name: "long", value: "buy" },
-              { name: "short", value: "sell" },
-            ],
-          });
+          let side =
+            (findArg("buy", args) || findArg("sell", args)) ??
+            (await select({
+              message: "long or short?",
+              choices: [
+                { name: "long", value: "buy" },
+                { name: "short", value: "sell" },
+              ],
+            }));
           let amountCheck = false;
           let amount: number | undefined;
           while (!amountCheck) {
@@ -160,8 +209,14 @@ export default async function main({ args, flags }: Props) {
           }
 
           let price;
+          if (flags.price) {
+            price = flags.price;
+          }
+          if (tradeActionIndex) {
+            price = args[tradeActionIndex + 3];
+          }
           let executionPrices;
-          let scale: "linear" | "exponential";
+          let scale = flags.scaleType ?? "";
           if (executionStyle === "point")
             price = parseFloat(await input({ message: "price?" }));
           if (executionStyle === "range") {
@@ -170,23 +225,29 @@ export default async function main({ args, flags }: Props) {
             let iterations = parseInt(await input({ message: "iterations?" }));
             executionPrices = distributeNumbers(from, to, iterations);
 
-            scale = await select({
-              message: "range sizing distribution?",
-              choices: [{ value: "linear" }, { value: "exponential" }],
-            });
+            scale = flags.scale
+              ? flags.scaleType ?? "linear"
+              : await select({
+                  message: "range sizing distribution?",
+                  choices: [{ value: "linear" }, { value: "exponential" }],
+                });
           }
-          let isStop = await confirm({ message: "stop loss?" });
-          let stopLossPrice;
+          let isStop =
+            !!flags.stop ?? (await confirm({ message: "stop loss?" }));
+          let stopLossPrice = flags.stop ?? "";
           if (isStop)
             stopLossPrice = parseFloat(await input({ message: "stop price?" }));
 
-          let isTakeProfit = await confirm({ message: "take profit?" });
-          let takeProfitPrice;
+          let isTakeProfit =
+            !!flags.tp ?? (await confirm({ message: "take profit?" }));
+          let takeProfitPrice = flags.tp ?? "";
           if (isTakeProfit)
             takeProfitPrice = parseFloat(
               await input({ message: "take profit price?" }),
             );
-          let isReduce = await confirm({ message: "reduce only?" });
+          let isReduce =
+            (flags.reduce || findArg("reduce", args)) ??
+            (await confirm({ message: "reduce only?" }));
 
           //@todo add strict typing
           let params: any = {};
@@ -299,14 +360,16 @@ export default async function main({ args, flags }: Props) {
       case "settings":
       case "s":
         await (async () => {
-          let configAction = await select({
-            message: "config actions: ",
-            choices: [
-              { value: "view" },
-              { value: "modify" },
-              { value: "back" },
-            ],
-          });
+          let configAction =
+            (findArg("view", args) || findArg("modify", args)) ??
+            (await select({
+              message: "config actions: ",
+              choices: [
+                { value: "view" },
+                { value: "modify" },
+                { value: "back" },
+              ],
+            }));
           if (configAction === "back") return;
           switch (configAction) {
             case "view":
@@ -316,19 +379,23 @@ export default async function main({ args, flags }: Props) {
               if (answer) console.log(await getEnv());
               break;
             case "modify":
-              const option = await select({
-                message: "what would you like to modify?",
-                choices: [{ value: "config" }, { value: "env" }],
-              });
+              const option =
+                (findArg("config", args) || findArg("env", args)) ??
+                (await select({
+                  message: "what would you like to modify?",
+                  choices: [{ value: "config" }, { value: "env" }],
+                }));
               switch (option) {
                 case "config":
                   await verifyConfig({});
                   break;
                 case "env":
-                  const exchange = await select({
-                    message: "exchange?",
-                    choices: exchanges,
-                  });
+                  const exchange =
+                    flags.exchange ??
+                    (await select({
+                      message: "exchange?",
+                      choices: exchanges,
+                    }));
                   const newApiKey = await input({ message: "API Key:" });
                   const newApiSecret = await input({ message: "API Secret:" });
                   await setEnv({
