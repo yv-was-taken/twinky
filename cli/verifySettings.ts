@@ -5,7 +5,7 @@ import {
   markets,
   quoteCurrencies,
 } from "../options/index.ts";
-import { select, input } from "@inquirer/prompts";
+import { select, input, confirm } from "@inquirer/prompts";
 import * as fs from "fs";
 
 //type SetAssetProps = {
@@ -45,82 +45,115 @@ export async function verifyConfig({
   asset,
   leverage,
 }: VerifyConfigProps) {
-  if (!initialSetup) {
-    //     const doConfig = await confirm({
-    //       message:
-    //         "config not found! Would you like to set a config? (select 'no' for default values",
-    //     });
-    let newExchange: string =
-      exchange ??
-      (await select({
-        message: "exchange: ",
-        choices: exchanges,
-      }));
+  let _doSetup = initialSetup;
+  let askUserIfTheyWantToSetInitialConfig = true;
 
-    let newMarket: string =
-      market ??
-      (await select({
-        message: "market: ",
-        //@ts-ignore
-        choices: markets[newExchange],
-      }));
-    let newQuoteCurrency: string =
-      quoteCurrency ??
-      (await select({
-        message: "quote currency: ",
-        //@ts-ignore
-        choices: quoteCurrencies[newExchange][newMarket],
-      }));
-    let assetCheck = false;
-    let newAsset;
-    while (!assetCheck) {
-      newAsset =
-        asset ??
-        (await input({
-          message: 'default asset (ex. "BTC")',
+  while (askUserIfTheyWantToSetInitialConfig) {
+    askUserIfTheyWantToSetInitialConfig = false;
+    if (!_doSetup) {
+      let newExchange: string =
+        exchange ??
+        (await select({
+          message: "exchange: ",
+          choices: exchanges,
         }));
-      let assets = await getTickers({
-        exchange: newExchange ?? exchange,
-        market: newMarket ?? market,
-        quoteCurrency: newQuoteCurrency ?? quoteCurrency,
+
+      let newMarket: string =
+        market ??
+        (await select({
+          message: "market: ",
+          //@ts-ignore
+          choices: markets[newExchange],
+        }));
+      let newQuoteCurrency: string =
+        quoteCurrency ??
+        (await select({
+          message: "quote currency: ",
+          //@ts-ignore
+          choices: quoteCurrencies[newExchange][newMarket],
+        }));
+      let assetCheck = false;
+      let newAsset;
+      while (!assetCheck) {
+        newAsset =
+          asset ??
+          (await input({
+            message: 'default asset (ex. "BTC")',
+          }));
+        let assets = await getTickers({
+          exchange: newExchange ?? exchange,
+          market: newMarket ?? market,
+          quoteCurrency: newQuoteCurrency ?? quoteCurrency,
+        });
+        assetCheck = true;
+        if (
+          !(assets + "/" + quoteCurrency + ":" + quoteCurrency).includes(
+            newAsset,
+          )
+        ) {
+          console.log(
+            "asset not found for: ",
+            exchange,
+            market,
+            ".. try again",
+          );
+          assetCheck = false;
+        }
+      }
+
+      let levCheck = false;
+      let newLeverage;
+      while (!levCheck) {
+        newLeverage =
+          leverage ??
+          parseInt(
+            await input({
+              message: "leverage: (max 10)",
+            }),
+          );
+        levCheck = true;
+        if (leverage && leverage > 10) {
+          console.log("leverage too high. try again");
+          levCheck = false;
+        }
+      }
+      console.log("updating config...");
+      await setConfig({
+        exchange: newExchange,
+        market: newMarket,
+        quoteCurrency: newQuoteCurrency,
+        asset: newAsset,
+        leverage: newLeverage,
       });
-      assetCheck = true;
-      if (
-        !(assets + "/" + quoteCurrency + ":" + quoteCurrency).includes(newAsset)
-      ) {
-        console.log("asset not found for: ", exchange, market, ".. try again");
-        assetCheck = false;
-      }
-    }
+      console.log("config updated!");
 
-    let levCheck = false;
-    let newLeverage;
-    while (!levCheck) {
-      newLeverage =
-        leverage ??
-        parseInt(
-          await input({
-            message: "leverage: (max 10)",
-          }),
-        );
-      levCheck = true;
-      if (leverage && leverage > 10) {
-        console.log("leverage too high. try again");
-        levCheck = false;
-      }
+      console.log(await getConfig());
+    } else {
+      if (!fs.existsSync(".blinkConfig.json")) {
+        const doNotDoDefaultConfig = await confirm({
+          message:
+            "config not found! Would you like to set a config? (select 'no' for default values).",
+        });
+        if (!doNotDoDefaultConfig) {
+          console.log(
+            "\ndefault config set! select the `settings` option to view/modify config at any time.\n",
+          );
+          setConfig({ isDefault: true });
+          return;
+        } else {
+          setConfig({
+            exchange: exchange,
+            market: market,
+            quoteCurrency: quoteCurrency,
+            asset: asset,
+            leverage: leverage,
+          });
+          return;
+        }
+      } else askUserIfTheyWantToSetInitialConfig = true;
+      return;
     }
-    console.log("updating config...");
-    await setConfig({
-      exchange: newExchange,
-      market: newMarket,
-      quoteCurrency: newQuoteCurrency,
-      asset: newAsset,
-      leverage: newLeverage,
-    });
-    console.log("config updated!");
-
-    console.log(await getConfig());
-  } else setConfig({ isDefault: true });
+  }
 }
 
 type VerifyEnvProps = {
@@ -146,10 +179,7 @@ export async function verifyEnv({ newKey, newSecret }: VerifyEnvProps) {
     setEnv({ exchange: exchange, apiKey: apiKey, apiSecret: apiSecret });
   }
 }
-export async function verifySettings({
-  initialConfig = false,
-  initialEnv = false,
-}) {
-  await verifyConfig({ initialSetup: initialConfig });
+export async function verifySettings({ initialSetup = false }) {
+  await verifyConfig({ initialSetup: initialSetup });
   await verifyEnv({});
 }

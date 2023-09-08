@@ -21,7 +21,7 @@ import {
 import { cli } from "../parse/index.ts";
 import trade from "../actions/trade.ts";
 import view from "../actions/view.ts";
-import { verifySettings, verifyConfig } from "./verifySettings.ts";
+import { verifyConfig } from "./verifySettings.ts";
 
 type Props = {
   args: string[];
@@ -29,17 +29,17 @@ type Props = {
     action?: string;
     chase?: string;
     scale?: boolean;
-    scaleType?: "linear" | "exponential";
+    scaleType?: string; //"linear" | "exponential"
     from?: number;
     to?: number;
-    type?: "market" | "limit";
+    type?: string; //"market" | "limit";
     symbol?: string;
     stop?: number;
     tp?: number;
     reduce?: boolean;
     exchange?: "bybit" /* | "binance" | "dydx" */;
     leverage?: number;
-    price?: number;
+    price?: string;
   };
 };
 
@@ -155,10 +155,10 @@ export default async function main({ args, flags }: Props) {
 
           console.log("trading:", symbol);
 
-          let type;
+          let type: string = "";
 
           if (flags.type) {
-            args = flags.type;
+            type = flags.type;
           }
           if (tradeActionIndex) {
             if (
@@ -208,7 +208,7 @@ export default async function main({ args, flags }: Props) {
             }
           }
 
-          let price;
+          let price: string = "";
           if (flags.price) {
             price = flags.price;
           }
@@ -218,7 +218,7 @@ export default async function main({ args, flags }: Props) {
           let executionPrices;
           let scale = flags.scaleType ?? "";
           if (executionStyle === "point")
-            price = parseFloat(await input({ message: "price?" }));
+            price = await input({ message: "price?" });
           if (executionStyle === "range") {
             let from = parseFloat(await input({ message: "from?" }));
             let to = parseFloat(await input({ message: "to?" }));
@@ -285,7 +285,7 @@ export default async function main({ args, flags }: Props) {
 
             for (let i = 0; i < splitPricesIntoChunks.length; i++) {
               await Promise.all(
-                splitPricesIntoChunks[i].map(async (executionPrice: number) => {
+                splitPricesIntoChunks[i].map(async (executionPrice: any) => {
                   if (scale === "exponential") {
                     amountPerIterationExp = amountPerIteration * j * j;
                     amountPerIterationExp =

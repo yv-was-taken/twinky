@@ -3,11 +3,11 @@ import { getConfig, getEnv } from "../utils/index.ts";
 
 type Props = {
   connect: any; //tricky typing
-  symbol: string | undefined;
+  symbol?: string;
   type: string;
   side: string;
-  amount: number | undefined;
-  price: number | undefined;
+  amount?: number;
+  price?: string;
   params: any; //@todo check later
   isVerbose?: boolean;
 };
