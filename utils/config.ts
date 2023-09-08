@@ -53,10 +53,11 @@ export function getConfig() {
     fs.readFileSync(".blinkConfig.json", { encoding: "utf8", flag: "a+" }),
   );
   return {
-    exchange: config.exchange,
-    market: config.market,
-    quoteCurrency: config.quoteCurrency,
-    asset: config.asset,
-    leverage: config.leverage,
+    //if not set for whatever reason, revert to default values
+    exchange: config.exchange ?? "bybit",
+    market: config.market ?? "perp",
+    quoteCurrency: config.quoteCurrency ?? "USDT",
+    asset: config.asset ?? "BTC",
+    leverage: config.leverage ?? "10",
   };
 }
