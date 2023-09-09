@@ -9,15 +9,110 @@ import { select, input, confirm } from "@inquirer/prompts";
 import * as fs from "fs";
 
 type VerifyConfigProps = {
-  initialSetup?: boolean;
+  modifyConfig?: boolean;
   exchange?: string;
   market?: string;
   quoteCurrency?: string;
   asset?: string;
   leverage?: number;
 };
+
+type ModifyConfigProps = {
+  exchange?: string;
+  market?: string;
+  quoteCurrency?: string;
+  asset?: string;
+  leverage?: number;
+};
+
+async function _modifyConfig({
+  exchange,
+  market,
+  quoteCurrency,
+  asset,
+  leverage,
+}: ModifyConfigProps) {
+  let newExchange: string =
+    exchange ??
+    (await select({
+      message: "exchange: ",
+      choices: exchanges,
+    }));
+
+  let newMarket: string =
+    market ??
+    (await select({
+      message: "market: ",
+      //@ts-ignore
+      choices: markets[newExchange],
+    }));
+  let newQuoteCurrency: string =
+    quoteCurrency ??
+    (await select({
+      message: "quote currency: ",
+      //@ts-ignore
+      choices: quoteCurrencies[newExchange][newMarket],
+    }));
+  let assetCheck = false;
+  let newAsset;
+  while (!assetCheck) {
+    newAsset =
+      asset ??
+      (await input({
+        message: 'default asset (ex. "BTC")',
+      }));
+    console.log("checking if asset is valid...");
+    let assets = await getTickers({
+      exchange: newExchange ?? exchange,
+      market: newMarket ?? market,
+      quoteCurrency: newQuoteCurrency ?? quoteCurrency,
+    });
+    assetCheck = true;
+    if (
+      !(assets + "/" + quoteCurrency + ":" + quoteCurrency).includes(newAsset)
+    ) {
+      console.log(
+        "asset not found for: ",
+        newExchange,
+        newMarket,
+        ".. try again",
+      );
+      assetCheck = false;
+    } else {
+      console.log("looks good!");
+    }
+  }
+
+  let levCheck = false;
+  let newLeverage;
+  while (!levCheck) {
+    newLeverage =
+      leverage ??
+      parseInt(
+        await input({
+          message: "leverage: (max 10)",
+        }),
+      );
+    levCheck = true;
+    if (leverage && leverage > 10) {
+      console.log("leverage too high. try again");
+      levCheck = false;
+    }
+  }
+  await setConfig({
+    exchange: newExchange,
+    market: newMarket,
+    quoteCurrency: newQuoteCurrency,
+    asset: newAsset,
+    leverage: newLeverage,
+  });
+  console.log("config updated!");
+
+  console.log(await getConfig());
+  await sleep(1000);
+}
 export async function verifyConfig({
-  initialSetup = false,
+  modifyConfig = true,
   exchange,
   market,
   quoteCurrency,
@@ -26,7 +121,8 @@ export async function verifyConfig({
 }: VerifyConfigProps) {
   if (!fs.existsSync(".blinkConfig.json")) {
     const setInitialConfigAsDefault = await confirm({
-      message: "config not found! Would you like to set a custom config?",
+      message:
+        "config not found! Would you like to set a custom config?  (otherwise load default values.)",
     });
     //if initial, set default config, exit loop.
     if (!setInitialConfigAsDefault) {
@@ -36,86 +132,17 @@ export async function verifyConfig({
       await sleep(1000);
       setConfig({ isDefault: true });
       return;
+    } else {
+      await _modifyConfig({ exchange, market, quoteCurrency, asset, leverage });
+      return;
     }
     //else proceed with custom value prompts
-  }
-
-  if (initialSetup) {
-    let newExchange: string =
-      exchange ??
-      (await select({
-        message: "exchange: ",
-        choices: exchanges,
-      }));
-
-    let newMarket: string =
-      market ??
-      (await select({
-        message: "market: ",
-        //@ts-ignore
-        choices: markets[newExchange],
-      }));
-    let newQuoteCurrency: string =
-      quoteCurrency ??
-      (await select({
-        message: "quote currency: ",
-        //@ts-ignore
-        choices: quoteCurrencies[newExchange][newMarket],
-      }));
-    let assetCheck = false;
-    let newAsset;
-    while (!assetCheck) {
-      newAsset =
-        asset ??
-        (await input({
-          message: 'default asset (ex. "BTC")',
-        }));
-      let assets = await getTickers({
-        exchange: newExchange ?? exchange,
-        market: newMarket ?? market,
-        quoteCurrency: newQuoteCurrency ?? quoteCurrency,
-      });
-      assetCheck = true;
-      if (
-        !(assets + "/" + quoteCurrency + ":" + quoteCurrency).includes(newAsset)
-      ) {
-        console.log("asset not found for: ", exchange, market, ".. try again");
-        assetCheck = false;
-      }
+  } else {
+    if (modifyConfig) {
+      await _modifyConfig({ exchange, market, quoteCurrency, asset, leverage });
+      return;
     }
-
-    let levCheck = false;
-    let newLeverage;
-    while (!levCheck) {
-      newLeverage =
-        leverage ??
-        parseInt(
-          await input({
-            message: "leverage: (max 10)",
-          }),
-        );
-      levCheck = true;
-      if (leverage && leverage > 10) {
-        console.log("leverage too high. try again");
-        levCheck = false;
-      }
-    }
-    console.log("updating config...");
-    await sleep(250);
-    await setConfig({
-      exchange: newExchange,
-      market: newMarket,
-      quoteCurrency: newQuoteCurrency,
-      asset: newAsset,
-      leverage: newLeverage,
-    });
-    console.log("config updated!");
-    await sleep(500);
-
-    console.log(await getConfig());
   }
-
-  return;
 }
 
 type VerifyEnvProps = {
@@ -141,7 +168,7 @@ export async function verifyEnv({ newKey, newSecret }: VerifyEnvProps) {
     setEnv({ exchange: exchange, apiKey: apiKey, apiSecret: apiSecret });
   }
 }
-export async function verifySettings({ initialSetup = false }) {
-  await verifyConfig({ initialSetup: initialSetup });
+export async function verifySettings({ modifyConfig = false }) {
+  await verifyConfig({ modifyConfig: modifyConfig });
   await verifyEnv({});
 }

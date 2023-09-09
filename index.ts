@@ -3,8 +3,9 @@ import main from "./cli/main.ts";
 import { inputs, flags } from "./parse/cli.ts";
 
 async function app() {
-  await verifySettings({ initialSetup: true });
+  await verifySettings({ modifyConfig: false });
   //meow cli flag types do not play nice with tsc
+
   //@ts-ignore
   await main({ args: inputs, flags: flags });
 }
