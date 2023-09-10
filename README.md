@@ -1,5 +1,18 @@
 # Blink: Crypto Trading API Modular CLI Suite
 
+---
+
+blink is a discretionary CLI suite designed by weeb traders, for weeb traders.
+
+It is important to note that, as of right now, this is not designed to be a
+competitive execution tool for HFT/low latency strategies. Trades are executed
+via REST requests, and functionally speaking takes the same amount of time as
+click trading in the UI.
+
+But blink is designed with modular systems in mind. Meaning it enables anyone to
+build their systems on top ,where blink can handle trade executions and API
+KEY/secret payloads, as well as data regarding portfolios, markets, etc.
+
 ```
 
   actions:
@@ -27,10 +40,8 @@
 
 ### todo:
 
-    - command line arg flow
     - calculate/display risk for trade before confirmation
     - wss listen
-    - set leverage for each ticker flow impl
     - prettier/more colorful error logging.
     - order book limit FOK chase orders
     - conditional trigger orders
