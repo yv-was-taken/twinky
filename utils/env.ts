@@ -12,12 +12,19 @@ export function setEnv({ exchange, apiKey, apiSecret }: Props) {
     );
     return;
   }
-  const env = {
-    [exchange]: {
-      API_KEY: apiKey,
-      API_SECRET: apiSecret,
-    },
+  const env = getEnv();
+
+  env[exchange] = {
+    API_KEY: apiKey,
+    API_SECRET: apiSecret,
   };
+
+  //const env = {
+  //  [exchange]: {
+  //    API_KEY: apiKey,
+  //    API_SECRET: apiSecret,
+  //  },
+  //};
   fs.writeFileSync(".env.json", JSON.stringify(env, null, 2));
 }
 
