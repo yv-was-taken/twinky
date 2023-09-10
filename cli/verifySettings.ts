@@ -32,13 +32,14 @@ async function _modifyConfig({
   asset,
   leverage,
 }: ModifyConfigProps) {
+  console.log("bark");
   let newExchange: string =
     exchange ??
     (await select({
       message: "exchange: ",
       choices: exchanges,
     }));
-
+  console.log("meow");
   let newMarket: string =
     market ??
     (await select({
@@ -46,6 +47,7 @@ async function _modifyConfig({
       //@ts-ignore
       choices: markets[newExchange],
     }));
+  console.log("squeak");
   let newQuoteCurrency: string =
     quoteCurrency ??
     (await select({
