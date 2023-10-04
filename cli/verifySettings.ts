@@ -161,6 +161,7 @@ export async function verifyEnv({
     if (!exchange || !newKey || !newSecret) {
       try {
         fs.readFileSync(".env.json");
+        return;
       } catch (err) {
         const setApiKey = await confirm({
           message: "Env not found! Would you like to set an API Key now?",
