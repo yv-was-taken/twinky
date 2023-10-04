@@ -148,24 +148,79 @@ export async function verifyConfig({
 type VerifyEnvProps = {
   newKey?: string;
   newSecret?: string;
+  exchange?: string;
 };
-export async function verifyEnv({ newKey, newSecret }: VerifyEnvProps) {
-  const { exchange } = await getConfig();
-  try {
-    fs.readFileSync(".env.json");
-  } catch (err) {
-    console.log("Setting API config for: ", exchange);
-    const apiKey =
-      newKey ??
-      (await input({
-        message: `API Key:`,
-      }));
-    const apiSecret =
-      newSecret ??
-      (await input({
-        message: `API Secret:`,
-      }));
-    setEnv({ exchange: exchange, apiKey: apiKey, apiSecret: apiSecret });
+export async function verifyEnv({
+  newKey,
+  newSecret,
+  exchange,
+}: VerifyEnvProps) {
+  //    const { exchange } = await getConfig();
+
+  while (true) {
+    if (!exchange || !newKey || !newSecret) {
+      try {
+        fs.readFileSync(".env.json");
+      } catch (err) {
+        const setApiKey = await confirm({
+          message: "Env not found! Would you like to set an API Key now?",
+        });
+        if (setApiKey) {
+          const exchangeToSet =
+            exchange ??
+            (await select({
+              message: "exchange: ",
+              choices: exchanges,
+            }));
+          console.log("Setting API config for: ", exchangeToSet);
+          const apiKey =
+            newKey ??
+            (await input({
+              message: `API Key:`,
+            }));
+          const apiSecret =
+            newSecret ??
+            (await input({
+              message: `API Secret:`,
+            }));
+
+          let isEnvSet = await setEnv({
+            exchange: exchangeToSet,
+            apiKey: apiKey,
+            apiSecret: apiSecret,
+          });
+          if (isEnvSet) return;
+        } else
+          console.log(
+            "Ok, keep in mind you will need an API Key in order to make trades!",
+          );
+        return;
+      }
+    } else {
+      const exchangeToSet =
+        exchange ??
+        (await select({
+          message: "exchange: ",
+          choices: exchanges,
+        }));
+      console.log("Setting API config for: ", exchangeToSet);
+      const apiKey =
+        newKey ??
+        (await input({
+          message: `API Key:`,
+        }));
+      const apiSecret =
+        newSecret ??
+        (await input({
+          message: `API Secret:`,
+        }));
+      let isEnvSet = await setEnv({
+        exchange: exchangeToSet,
+        apiKey: apiKey,
+        apiSecret: apiSecret,
+      });
+      if (isEnvSet) return;
+    }
   }
 }
 export async function verifySettings({ modifyConfig = false }) {
