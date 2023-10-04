@@ -163,39 +163,33 @@ export async function verifyEnv({
         fs.readFileSync(".env.json");
         return;
       } catch (err) {
-        const setApiKey = await confirm({
-          message: "Env not found! Would you like to set an API Key now?",
-        });
-        if (setApiKey) {
-          const exchangeToSet =
-            exchange ??
-            (await select({
-              message: "exchange: ",
-              choices: exchanges,
-            }));
-          console.log("Setting API config for: ", exchangeToSet);
-          const apiKey =
-            newKey ??
-            (await input({
-              message: `API Key:`,
-            }));
-          const apiSecret =
-            newSecret ??
-            (await input({
-              message: `API Secret:`,
-            }));
+        console.log(
+          "Env not found! Please set an API Key. You will need one to perform actions.",
+        );
+        const exchangeToSet =
+          exchange ??
+          (await select({
+            message: "exchange: ",
+            choices: exchanges,
+          }));
+        console.log("Setting API config for: ", exchangeToSet);
+        const apiKey =
+          newKey ??
+          (await input({
+            message: `API Key:`,
+          }));
+        const apiSecret =
+          newSecret ??
+          (await input({
+            message: `API Secret:`,
+          }));
 
-          let isEnvSet = await setEnv({
-            exchange: exchangeToSet,
-            apiKey: apiKey,
-            apiSecret: apiSecret,
-          });
-          if (isEnvSet) return;
-        } else
-          console.log(
-            "Ok, keep in mind you will need an API Key in order to make trades!",
-          );
-        return;
+        let isEnvSet = await setEnv({
+          exchange: exchangeToSet,
+          apiKey: apiKey,
+          apiSecret: apiSecret,
+        });
+        if (isEnvSet) return;
       }
     } else {
       const exchangeToSet =

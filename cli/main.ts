@@ -26,13 +26,20 @@ import { verifyConfig } from "./verifySettings.ts";
 type Props = {
   args: string[];
   flags: {
-    action?: string;
+    action?:
+      | "trade"
+      | "listen"
+      | "view"
+      | "settings"
+      | "help"
+      | "exit"
+      | "none";
     chase?: string;
     scale?: boolean;
-    scaleType?: string; //"linear" | "exponential"
+    scaleType?: "linear" | "exponential";
     from?: number;
     to?: number;
-    type?: string; //"market" | "limit";
+    type?: "market" | "limit";
     symbol?: string;
     stop?: number;
     tp?: number;
@@ -62,11 +69,12 @@ export default async function main({ args, flags }: Props) {
     secret: env[exchange].API_SECRET,
   });
 
-  console.log(cli.help);
+  if (!args.length) console.log(cli.help);
   while (true) {
-    console.log(
-      "\nselect action when ready. or type 'help' for list of actions.",
-    );
+    if (!args.length)
+      console.log(
+        "\nselect action when ready. or type 'help' for list of actions.",
+      );
 
     action =
       flags.action === "none" && !args.length
