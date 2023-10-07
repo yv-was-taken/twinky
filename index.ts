@@ -1,5 +1,4 @@
-import { verifySettings } from "./cli/verifySettings.ts";
-import main from "./cli/main.ts";
+import { main, verifySettings } from "./cli/index.ts";
 import { inputs, flags } from "./parse/cli.ts";
 
 async function app() {

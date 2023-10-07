@@ -21,7 +21,12 @@ import {
 import { cli } from "../parse/index.ts";
 import trade from "../actions/trade.ts";
 import view from "../actions/view.ts";
-import { verifyConfig } from "./verifySettings.ts";
+import {
+  verifyConfig,
+  leverageCheck,
+  amountCheck,
+  symbolCheck,
+} from "./index.ts";
 
 type Props = {
   args: string[];
@@ -45,7 +50,7 @@ type Props = {
     tp?: number;
     reduce?: boolean;
     exchange?: "bybit" /* | "binance" | "dydx" */;
-    leverage?: number;
+    leverage?: string;
     price?: string;
   };
 };
@@ -55,7 +60,7 @@ type Props = {
 export default async function main({ args, flags }: Props) {
   let leverage;
   let action;
-  let symbol;
+  let symbol: any; //@TODO strict typing
   let type;
   let executionStyle;
   let scale;
@@ -89,6 +94,7 @@ export default async function main({ args, flags }: Props) {
         break;
       case "trade":
       case "t":
+        let tradeActionIndex: number | undefined;
         await (async () => {
           const { market, quoteCurrency } = getConfig();
           const tickers = await getTickers({
@@ -97,71 +103,34 @@ export default async function main({ args, flags }: Props) {
             quoteCurrency: quoteCurrency,
           });
 
-          let symbol = "";
-          let tradeActionIndex: number | undefined;
-          if (!args.length) {
-            if (findArg("buy", args) || findArg("sell", args)) {
-              tradeActionIndex =
-                args.indexOf("buy") > -1
-                  ? args.indexOf("buy")
-                  : args.indexOf("sell");
-              symbol = args[tradeActionIndex + 1]; //must come after "buy/sell"
-              const formatSymbolObject = formatSymbol(
-                symbol,
-                tickers,
-                exchange,
-              );
-              if (!formatSymbolObject.isSymbolValid) {
-                throw new Error("symbol not valid, please try again.");
-              }
-              symbol = formatSymbolObject.symbol;
-            }
-          } else {
-            symbol = flags.symbol ?? "";
-          }
-
-          let symbolCheck = false;
-          if (!symbol) {
-            while (!symbolCheck) {
-              symbol = await input({ message: "symbol? (enter for default)" });
-
-              if (symbol === "exit") return;
-              const formatSymbolObject = formatSymbol(
-                symbol,
-                tickers,
-                exchange,
-              );
-              symbol = formatSymbolObject.symbol;
-              symbolCheck = formatSymbolObject.isSymbolValid;
-              //symbolCheck = checkTicker(asset, quoteCurrency, tickers, exchange);
-            }
-          }
-
-          const isDefaultLeverage =
-            flags.leverage ??
-            (await confirm({
-              message: "use default leverage?",
-            }));
-          if (isDefaultLeverage) {
-            leverage = getConfig().leverage;
-          } else if (!flags.leverage) {
-            let leverageCheck = true;
-            while (leverageCheck) {
-              try {
-                leverage = parseFloat(await input({ message: "leverage?" }));
-                leverageCheck = false;
-              } catch (err) {
-                console.log("input must be a number, please try again.");
-                leverageCheck = true;
-              }
-            }
-          }
-          //throws err if leverage is already set to the same number
-          try {
-            await connect.setLeverage(leverage, symbol);
-          } catch {}
+          symbol = await symbolCheck({
+            symbol: flags.symbol,
+            exchange: exchange,
+            retry: flags.symbol ? false : true,
+            tickers: tickers,
+          });
+          //          if (!args.length) {
+          //            if (findArg("buy", args) || findArg("sell", args)) {
+          //              tradeActionIndex =
+          //                args.indexOf("buy") > -1
+          //                  ? args.indexOf("buy")
+          //                  : args.indexOf("sell");
+          //              symbol = await symbolCheck({symbol: args[tradeActionIndex + 1], tickers: tickers, exchange: exchange, retry: false}); //must come after "buy/sell"
+          //
+          //            }
+          //          } else {
+          //              console.log("mewo")
+          //            symbol = await symbolCheck({tickers: tickers, exchange: exchange, retry: true});
+          //              console.log("bark")
+          //          }
 
           console.log("trading:", symbol);
+          leverage = await leverageCheck({
+            leverage: flags.leverage,
+            retry: true,
+            connect: connect,
+            symbol: symbol,
+          });
 
           let type: string = "";
 
@@ -201,20 +170,9 @@ export default async function main({ args, flags }: Props) {
                 { name: "short", value: "sell" },
               ],
             }));
-          let amountCheck = false;
-          let amount: number | undefined;
-          while (!amountCheck) {
-            try {
-              amount = parseFloat(await input({ message: "order size?" }));
-              amountCheck = true;
-              if (!amount) {
-                console.log("amount cannot be blank.");
-                amountCheck = false;
-              }
-            } catch (err) {
-              console.log("input must be a number. please try again.");
-            }
-          }
+          let amount = await amountCheck({
+            /*amount:flags.amount,*/ retry: true,
+          });
 
           let price: string = "";
           if (flags.price) {
@@ -337,9 +295,15 @@ export default async function main({ args, flags }: Props) {
               price: price,
               params: params,
             });
+            //         //  console.log(`trade success! placed ${amount} ${symbol} ${side} ${type} order`);
+            //console.log('trade success!');
+            //console.log("symbol", symbol);
+            //console.log("type", type);
+            //console.log("side", side);
+            //console.log("amount", amount);
+            //console.log("price", price);
+            //console.log('params', params);
           }
-
-          //trade thing
         })();
         break;
 

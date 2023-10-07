@@ -1,5 +1,6 @@
 import ccxt from "ccxt";
 import { getConfig, getEnv } from "../utils/index.ts";
+import { input } from "@inquirer/prompts";
 
 export default async function view(target: string) {
   const env = getEnv();
@@ -75,7 +76,13 @@ export default async function view(target: string) {
       break;
     case "closed orders":
       console.log("fetching closed orders...");
-      let closedOrders = await connect.fetchClosedOrders();
+      let symbol = await input({ message: "symbol? Enter for all symbols" });
+
+      let closedOrders = await connect.fetchClosedOrders(
+        undefined,
+        undefined,
+        2,
+      );
       if (closedOrders.length === 0) {
         console.log("no orders closed!");
       } else {

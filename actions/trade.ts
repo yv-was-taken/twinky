@@ -19,7 +19,7 @@ export default async function trade({
   amount,
   price,
   params,
-  isVerbose = false,
+  isVerbose = true,
 }: Props) {
   if (isVerbose) console.log("placing trade...");
   try {
