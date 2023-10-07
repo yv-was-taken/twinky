@@ -31,42 +31,44 @@ import {
 type Props = {
   args: string[];
   flags: {
-    action?:
-      | "trade"
-      | "listen"
-      | "view"
-      | "settings"
-      | "help"
-      | "exit"
-      | "none";
-    chase?: string;
+    //    action?:
+    //      | "trade"
+    //      | "listen"
+    //      | "view"
+    //      | "settings"
+    //      | "help"
+    //      | "exit"
+    //      | "none";
+    exchange?: "bybit";
+    chase?: boolean;
     scale?: boolean;
-    scaleType?: "linear" | "exponential";
+    scaleType: "linear" | "exponential";
     from?: number;
     to?: number;
     type?: "market" | "limit";
     symbol?: string;
-    stop?: number;
-    tp?: number;
-    reduce?: boolean;
-    exchange?: "bybit" /* | "binance" | "dydx" */;
     leverage?: string;
     price?: string;
+    amount?: string;
+    reduce?: boolean;
+    stop?: string;
+    takeProfit?: string;
+    tpType?: "market" | "limit";
   };
 };
 
-//@todo impl:
-//if (flags.buy && flags.sell) throw new Error(can't pass both buy and sell args)
 export default async function main({ args, flags }: Props) {
-  let leverage;
-  let action;
-  let symbol: any; //@TODO strict typing
-  let type;
-  let executionStyle;
-  let scale;
+  console.log("flags", flags);
+  let leverage: string | number | undefined;
+  let action: string | undefined;
+  let symbol: string | undefined;
+  let type: string | undefined;
+  let executionStyle: string | undefined;
+  let scale: boolean | undefined;
   const config = getConfig();
   const env = getEnv();
-  const exchange = getConfig().exchange;
+  const exchange: string = flags.exchange ?? getConfig().exchange;
+  //@dev tricky typing
   //@ts-ignore
   const exchangeClass = ccxt[exchange];
   const connect = new exchangeClass({
@@ -81,12 +83,11 @@ export default async function main({ args, flags }: Props) {
         "\nselect action when ready. or type 'help' for list of actions.",
       );
 
-    action =
-      flags.action === "none" && !args.length
-        ? await input({
-            message: `\n>`,
-          })
-        : flags.action;
+    action = !args.length
+      ? await input({
+          message: `\n>`,
+        })
+      : args[0];
     switch (action) {
       case "help":
       case "h":
@@ -137,14 +138,7 @@ export default async function main({ args, flags }: Props) {
           if (flags.type) {
             type = flags.type;
           }
-          if (tradeActionIndex) {
-            if (
-              args[tradeActionIndex + 2] === "market" ||
-              args[tradeActionIndex] + 2 === "limit"
-            ) {
-              type = args[tradeActionIndex + 2];
-            }
-          }
+
           if (!type) {
             type = await select({
               message: "order type?",
@@ -171,15 +165,13 @@ export default async function main({ args, flags }: Props) {
               ],
             }));
           let amount = await amountCheck({
-            /*amount:flags.amount,*/ retry: true,
+            amount: flags.amount,
+            retry: flags.amount !== null ? false : true,
           });
 
           let price: string = "";
           if (flags.price) {
             price = flags.price;
-          }
-          if (tradeActionIndex) {
-            price = args[tradeActionIndex + 3];
           }
           let executionPrices;
           let scale = flags.scaleType ?? "";
@@ -192,22 +184,22 @@ export default async function main({ args, flags }: Props) {
             executionPrices = distributeNumbers(from, to, iterations);
 
             scale = flags.scale
-              ? flags.scaleType ?? "linear"
+              ? flags.scaleType
               : await select({
                   message: "range sizing distribution?",
                   choices: [{ value: "linear" }, { value: "exponential" }],
                 });
           }
-          let isStop =
-            !!flags.stop ?? (await confirm({ message: "stop loss?" }));
-          let stopLossPrice = flags.stop ?? "";
-          if (isStop)
+          let isStop = flags.stop ?? (await confirm({ message: "stop loss?" }));
+          let stopLossPrice: number | string | undefined = flags.stop ?? "";
+          if (isStop && flags.stop)
             stopLossPrice = parseFloat(await input({ message: "stop price?" }));
 
           let isTakeProfit =
-            !!flags.tp ?? (await confirm({ message: "take profit?" }));
-          let takeProfitPrice = flags.tp ?? "";
-          if (isTakeProfit)
+            !!flags.takeProfit ?? (await confirm({ message: "take profit?" }));
+          let takeProfitPrice: number | string | undefined =
+            flags.takeProfit ?? "";
+          if (isTakeProfit && !flags.takeProfit)
             takeProfitPrice = parseFloat(
               await input({ message: "take profit price?" }),
             );
@@ -315,16 +307,19 @@ export default async function main({ args, flags }: Props) {
       case "view":
       case "v":
         await (async () => {
-          const target = await select({
-            message: "what would you like to view?",
-            choices: [
-              { value: "balance" },
-              { value: "open orders" },
-              { value: "closed orders" },
-              { value: "open positions" },
-              { value: "back" },
-            ],
-          });
+          const target =
+            args[1] === "balance" || args[1] === "positions"
+              ? args[1]
+              : await select({
+                  message: "what would you like to view?",
+                  choices: [
+                    { value: "balance" },
+                    { value: "open orders" },
+                    { value: "closed orders" },
+                    { name: "open positions", value: "positions" },
+                    { value: "back" },
+                  ],
+                });
           if (target === "back") return;
           await view(target);
         })();
@@ -390,7 +385,6 @@ export default async function main({ args, flags }: Props) {
       default:
         console.log("action not valid! please try again");
     }
-    if (flags.action === "exit" || (!!args.length && flags.action === "none"))
-      return;
+    if (action === "exit" || action === "none" || !!args.length) return;
   }
 }

@@ -23,31 +23,33 @@ const cli = meow(
   {
     importMeta: import.meta,
     flags: {
-      action: {
-        type: "string",
-        shortFlag: "a",
-        choices: [
-          "none",
-          "trade",
-          "t",
-          "listen",
-          "l",
-          "view",
-          "v",
-          "settings",
-          "s",
-          "exit",
-        ],
-        default: "none",
-      },
+      //   action: {
+      //     type: "string",
+      //     shortFlag: "a",
+      //     choices: [
+      //       "none",
+      //       "trade",
+      //       "t",
+      //       "listen",
+      //       "l",
+      //       "view",
+      //       "v",
+      //       "settings",
+      //       "s",
+      //       "exit",
+      //     ],
+      //     default: "none",
+      //   },
       exchange: {
         type: "string",
-        choices: ["bybit" /*, "binance", "dydx" */],
+        choices: ["bybit"], //@TODO impl more exchanges
         isRequired: false,
       },
+      //@TODO implement limit chase trade execution
       chase: {
-        type: "string",
+        type: "boolean",
         shortFlag: "c",
+        isRequired: false,
       },
       scale: {
         type: "boolean",
@@ -58,7 +60,7 @@ const cli = meow(
 
       scaleType: {
         type: "string",
-        shortFlag: "t",
+        shortFlag: "st",
         choices: ["linear", "exponential"], //, "logarithmic"], //logarithmic choice is actuall f(x) = ln(x-1) [[x-intercept at 0]];
         default: "linear",
       },
@@ -73,19 +75,8 @@ const cli = meow(
           return false;
         },
       },
-      leverage: {
-        type: "number",
-        shortFlag: "lev",
-        isRequired: false,
-      },
-      price: {
-        type: "number",
-        shortFlag: "p",
-        isRequired: false,
-      },
       to: {
         type: "number",
-        shortflag: "t",
         //@ts-ignore
         isRequired: (flags, inputs) => {
           if (flags.scale) {
@@ -102,82 +93,76 @@ const cli = meow(
           //weird ts error without:
           //2367: This comparison appears to be unintentional because the types 'AnyFlag' and '"trade"' have no overlap.
 
-          if (flags.action === "trade" || flags.action === "t") {
+          if (inputs.includes("trade") || inputs.includes("t")) {
             return true;
           }
           return false;
         },
       },
-      buy: {
-        type: "number",
-        isRequired: (flags, inputs) => {
-          //@ts-ignore
-          if (flags.action === "t" || flags.action === "trade") {
-            return true;
-          }
-          return false;
-        },
+      symbol: {
+        type: "string",
+        isRequired: false,
       },
-      sell: {
+      leverage: {
         type: "number",
+        shortFlag: "lev",
+        isRequired: false,
+      },
+      price: {
+        type: "number",
+        shortFlag: "p",
+        isRequired: false,
+      },
+      amount: {
+        type: "number",
+        shortFlag: "a",
         isRequired: (flags, inputs) => {
-          //@ts-ignore
-          if (flags.action === "t" || flags.action === "trade") {
-            return true;
-          }
-          return false;
+          return inputs.includes("trade") || inputs.includes("t")
+            ? true
+            : false;
         },
       },
       reduce: {
         type: "boolean",
-        isRequired: false,
-      },
-      positions: {
-        type: "string",
-        isRequired: (flags, inputs) => {
-          //@ts-ignore
-          if (flags.action === "v" || flags.action === "view") {
-            return true;
-          }
-          return false;
-        },
-      },
-      listenType: {
-        type: "string",
-        choices: ["portfolio", "market"],
-        isRequired: (flags, action) => {
-          //@ts-ignore
-          if (flags.action === "listen") {
-            return true;
-          }
-          return false;
-        },
-      },
-      metric: {
-        type: "string",
-        choices: ["volume", "rsi"],
-        isRequired: (flags, inputs) => {
-          //@ts-ignore
-          if (flags.listenType === "market") {
-            return true;
-          }
-          return false;
-        },
+        default: false,
       },
       stop: {
         type: "number",
         isRequired: false,
       },
-      tp: {
+      takeProfit: {
+        shortFlag: "tp",
         type: "number",
         isRequired: false,
       },
       tpType: {
         type: "string",
         choices: ["market", "limit"],
-        isRequired: false,
+        default: "limit",
       },
     },
+    // listenType: {
+    //   type: "string",
+    //   choices: ["portfolio", "market"],
+    //   isRequired: (flags, action) => {
+    //     //@ts-ignore
+    //     if (flags.action === "listen") {
+    //       return true;
+    //     }
+    //     return false;
+    //   },
+    // },
+    // metric: {
+    //   type: "string",
+    //   choices: ["volume", "rsi"],
+    //   isRequired: (flags, inputs) => {
+    //     //@ts-ignore
+    //     if (flags.listenType === "market") {
+    //       return true;
+    //     }
+    //     return false;
+    //   },
+    // },
   },
 );
 const flags = cli.flags;
