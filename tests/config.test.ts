@@ -35,6 +35,7 @@ describe("setConfig", () => {
       market: "spot",
       quoteCurrency: "USDC",
       asset: "ETH",
+      leverage: 10,
     };
 
     await setConfig({

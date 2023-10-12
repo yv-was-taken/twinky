@@ -9,7 +9,7 @@ const cli = meow(
     --> listen for and log portfolio updates in real time.
 
             -view(v)
-        --> view portfolio, open orders, order history.
+    --> view portfolio, open orders, order history.
 
         -settings(s)
     --> view/modify config settings.
