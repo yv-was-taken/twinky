@@ -15,7 +15,7 @@
   "scripts": {
     "start": "ts-node index.ts",
     "prepare": "husky install",
-    "test": "ts-mocha tests/**.*ts"
+    "test": "ts-mocha -n loader=ts-node/esm -p tsconfig.json tests/**/*.test.ts"
   },
   "lint-staged": {
     "*": "prettier --ignore-unknown --write"
