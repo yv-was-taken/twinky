@@ -58,7 +58,6 @@ type Props = {
 };
 
 export default async function main({ args, flags }: Props) {
-  console.log("flags", flags);
   let leverage: string | number | undefined;
   let action: string | undefined;
   let symbol: string | undefined;
