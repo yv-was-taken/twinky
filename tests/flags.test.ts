@@ -6,7 +6,7 @@ chai.use(chaiExec);
 describe("command line flags", () => {
   it("should display help message when --help flag is passed", () => {
     const helpMessage = `
-  Blink: Crypto Trading API Modular CLI Suite
+  twinky: Crypto Trading API Modular CLI Suite
 
   actions:
           -trade(t)

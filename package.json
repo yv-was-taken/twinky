@@ -20,13 +20,13 @@
   "lint-staged": {
     "*": "prettier --ignore-unknown --write"
   },
-  "name": "blink",
+  "name": "Twinky",
   "version": "0.1.0",
-  "description": "Blink: Crypto Trading API Modular CLI Suite",
+  "description": "Twinky: Crypto Trading API Modular CLI Suite",
   "main": "index.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yv-was-taken/blink.git"
+    "url": "git+https://github.com/yv-was-taken/twinky.git"
   },
   "keywords": [
     "crypto",
@@ -38,9 +38,9 @@
   "author": "yv-was-taken",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yv-was-taken/blink/issues"
+    "url": "https://github.com/yv-was-taken/twinky/issues"
   },
-  "homepage": "https://github.com/yv-was-taken/blink#readme",
+  "homepage": "https://github.com/yv-was-taken/twinky#readme",
   "devDependencies": {
     "@types/chai": "^4.3.5",
     "@types/inquirer": "^9.0.3",

@@ -1,17 +1,17 @@
-# Blink: Crypto Trading API Modular CLI Suite
+# twinky: Crypto Trading API Modular CLI Suite
 
 ---
 
-blink is a discretionary CLI suite designed by weeb traders, for weeb traders.
+twinky is a discretionary CLI suite designed by crypto traders that hate GUIs, for crypto traders that hate GUIs.
 
 this is **not** designed to be competitive in terms of execution, but instead intended for discretionary use. if you want HFT speed execution, rewrite yourself in a lower level lang, or wait for the rust version 🐱
 
-blink is designed from a modular approach. Meaning, it enables anyone to
-build their systems on top, and is intended to be utilized as a tool that can handle otherwise tedious tasks of other automated trading systems such as env handling/exchange-specific api nuances, etc. blink was created to help unify authentication, execution and data parsing across exchange APIs.
+twinky is designed from a modular approach. Meaning, it enables anyone to
+build their systems on top, and is intended to be utilized as a tool that can handle otherwise tedious tasks of other automated trading systems such as env handling/exchange-specific api nuances, etc. twinky was created to help unify authentication, execution and data parsing across exchange APIs.
 
-it is recommended to run `blink` after install to setup config/env. this is requried for making any actions with blink, and blink will make you set up config/env before allowing any actions anyway.
+it is recommended to run `twinky` after install to setup config/env. this is requried for making any actions with twinky, and twinky will make you set up config/env before allowing any actions anyway.
 
-blink has two different modes...
+twinky has two different modes...
 -----------------------------
 ### interactive cli
 ```
@@ -37,7 +37,7 @@ blink has two different modes...
 
 ```
 
-`blink {action}` then feed prompts on request.
+`twinky {action}` then feed prompts on request.
 ##### `trade(t)`
 interactive command to execute a trade...
 

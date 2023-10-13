@@ -26,7 +26,7 @@ export function setConfig({
 
   let config;
   try {
-    const configFileContent = fs.readFileSync(".blinkConfig.json", "utf8");
+    const configFileContent = fs.readFileSync(".twinkyConfig.json", "utf8");
     config = JSON.parse(configFileContent);
   } catch (err) {
     config = defaultConfig;
@@ -34,7 +34,7 @@ export function setConfig({
 
   if (isDefault) {
     fs.writeFileSync(
-      ".blinkConfig.json",
+      ".twinkyConfig.json",
       JSON.stringify(defaultConfig, null, 2),
     );
   } else {
@@ -44,13 +44,13 @@ export function setConfig({
     if (asset) config.asset = asset;
     if (leverage) config.leverage = leverage;
 
-    fs.writeFileSync(".blinkConfig.json", JSON.stringify(config, null, 2));
+    fs.writeFileSync(".twinkyConfig.json", JSON.stringify(config, null, 2));
   }
 }
 
 export function getConfig() {
   const config = JSON.parse(
-    fs.readFileSync(".blinkConfig.json", { encoding: "utf8", flag: "a+" }),
+    fs.readFileSync(".twinkyConfig.json", { encoding: "utf8", flag: "a+" }),
   );
   return {
     //if not set for whatever reason, revert to default values

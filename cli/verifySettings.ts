@@ -119,7 +119,7 @@ export async function verifyConfig({
   asset,
   leverage,
 }: VerifyConfigProps) {
-  if (!fs.existsSync(".blinkConfig.json")) {
+  if (!fs.existsSync(".twinkyConfig.json")) {
     const setInitialConfigAsDefault = await confirm({
       message:
         "config not found! Would you like to set a custom config?  (otherwise load default values.)",
