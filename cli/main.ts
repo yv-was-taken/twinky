@@ -52,6 +52,7 @@ type Props = {
     amount?: string;
     reduce?: boolean;
     stop?: string;
+    side?: "buy" | "sell";
     takeProfit?: string;
     tpType?: "market" | "limit";
   };
@@ -126,7 +127,8 @@ export default async function main({ args, flags }: Props) {
 
           console.log("trading:", symbol);
           leverage = await leverageCheck({
-            leverage: flags.leverage,
+            leverage:
+              args.length > 0 ? flags.leverage ?? getConfig().leverage : null,
             retry: true,
             connect: connect,
             symbol: symbol,
@@ -155,7 +157,7 @@ export default async function main({ args, flags }: Props) {
                 });
           }
           let side =
-            (findArg("buy", args) || findArg("sell", args)) ??
+            flags.side ??
             (await select({
               message: "long or short?",
               choices: [
@@ -189,7 +191,10 @@ export default async function main({ args, flags }: Props) {
                   choices: [{ value: "linear" }, { value: "exponential" }],
                 });
           }
-          let isStop = flags.stop ?? (await confirm({ message: "stop loss?" }));
+          let isStop =
+            args.length > 0
+              ? flags.stop ?? false
+              : await confirm({ message: "stop loss?" });
           let stopLossPrice: number | string | undefined = flags.stop ?? "";
           if (isStop && flags.stop)
             stopLossPrice = parseFloat(await input({ message: "stop price?" }));
@@ -203,8 +208,11 @@ export default async function main({ args, flags }: Props) {
               await input({ message: "take profit price?" }),
             );
           let isReduce =
-            (flags.reduce || findArg("reduce", args)) ??
-            (await confirm({ message: "reduce only?" }));
+            args.length > 0
+              ? flags.reduce
+                ? true
+                : false
+              : await confirm({ message: "reduce only?" });
 
           //@todo add strict typing
           let params: any = {};
@@ -301,6 +309,7 @@ export default async function main({ args, flags }: Props) {
       case "listen":
       case "l":
         console.log("listen");
+        console.log("coming soon!");
         //wss listening for new positions opened, closed.
         break;
       case "view":

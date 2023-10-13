@@ -8,7 +8,7 @@ const cli = meow(
         -listen(l)
     --> listen for and log portfolio updates in real time.
 
-            -view(v)
+        -view(v)
     --> view portfolio, open orders, order history.
 
         -settings(s)
@@ -102,6 +102,16 @@ const cli = meow(
       symbol: {
         type: "string",
         isRequired: false,
+      },
+      side: {
+        type: "string",
+        choices: ["buy", "sell"],
+        isRequired: (flags, inputs) => {
+          if (inputs.includes("trade") || inputs.includes("t")) {
+            return true;
+          }
+          return false;
+        },
       },
       leverage: {
         type: "number",

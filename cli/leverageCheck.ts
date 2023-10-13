@@ -14,9 +14,13 @@ export default async function leverageCheck({
   symbol,
 }: Props): Promise<number> {
   while (true) {
-    let useDefaultLeverage = await confirm({
-      message: "use default leverage?",
-    });
+    let useDefaultLeverage: boolean | null = null;
+    if (!leverage) {
+      useDefaultLeverage = await confirm({
+        message: "use default leverage?",
+      });
+    }
+
     if (useDefaultLeverage) {
       return getConfig().leverage;
     } else {
