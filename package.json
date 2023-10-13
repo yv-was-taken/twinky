@@ -20,7 +20,7 @@
   "lint-staged": {
     "*": "prettier --ignore-unknown --write"
   },
-  "name": "Twinky",
+  "name": "twinky",
   "version": "0.1.0",
   "description": "Twinky: Crypto Trading API Modular CLI Suite",
   "main": "index.ts",
