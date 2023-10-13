@@ -105,9 +105,9 @@ export default async function main({ args, flags }: Props) {
           });
 
           symbol = await symbolCheck({
-            symbol: flags.symbol,
+            symbol: args.length > 0 ? flags.symbol ?? getConfig().asset : null,
             exchange: exchange,
-            retry: flags.symbol ? false : true,
+            retry: args.length > 0 ? false : true,
             tickers: tickers,
           });
           //          if (!args.length) {
@@ -149,12 +149,15 @@ export default async function main({ args, flags }: Props) {
 
           let executionStyle;
           if (type === "limit") {
-            executionStyle = flags.scale
-              ? "range"
-              : await select({
-                  message: "execution style?",
-                  choices: [{ value: "point" }, { value: "range" }],
-                });
+            executionStyle =
+              args.length > 0
+                ? flags.scale
+                  ? "range"
+                  : "point"
+                : await select({
+                    message: "execution style?",
+                    choices: [{ value: "point" }, { value: "range" }],
+                  });
           }
           let side =
             flags.side ??
@@ -316,8 +319,13 @@ export default async function main({ args, flags }: Props) {
       case "v":
         await (async () => {
           const target =
-            args[1] === "balance" || args[1] === "positions"
-              ? args[1]
+            args[1] === "balance" ||
+            args[1] === "positions" ||
+            args[2] === "orders"
+              ? args[2] === "orders" &&
+                (args[1] === "open" || args[1] === "closed")
+                ? args[2].concat(" ").concat(args[1])
+                : args[1]
               : await select({
                   message: "what would you like to view?",
                   choices: [
@@ -348,10 +356,20 @@ export default async function main({ args, flags }: Props) {
           if (configAction === "back") return;
           switch (configAction) {
             case "view":
-              let answer = await confirm({ message: "view config?" });
-              if (answer) console.log(await getConfig());
-              answer = await confirm({ message: "view env?" });
-              if (answer) console.log(await getEnv());
+              let answer =
+                (findArg("config", args) || findArg("env", args)) ??
+                (await select({
+                  message: "view ?",
+                  choices: [{ value: "config" }, { value: "env" }],
+                }));
+              switch (answer) {
+                case "config":
+                  console.log(await getConfig());
+                  break;
+                case "env":
+                  console.log(await getEnv());
+              }
+
               break;
             case "modify":
               const option =

@@ -66,7 +66,6 @@ const cli = meow(
       },
       from: {
         type: "number",
-        shortflag: "f",
         //@ts-ignore
         isRequired: (flags, inputs) => {
           if (flags.scale) {
@@ -89,10 +88,6 @@ const cli = meow(
         type: "string",
         choices: ["market", "limit"],
         isRequired: (flags, inputs) => {
-          //@ts-ignore @TODO remove ?
-          //weird ts error without:
-          //2367: This comparison appears to be unintentional because the types 'AnyFlag' and '"trade"' have no overlap.
-
           if (inputs.includes("trade") || inputs.includes("t")) {
             return true;
           }
@@ -121,7 +116,17 @@ const cli = meow(
       price: {
         type: "number",
         shortFlag: "p",
-        isRequired: false,
+        isRequired: (flags, inputs) => {
+          if (inputs.includes("trade") || inputs.includes("t")) {
+            //@ts-ignore
+            //nonsensical ts error, so ignoring... :
+            //2367: This comparison appears to be unintentional because the types 'AnyFlag' and '"trade"' have no overlap.
+            if (flags.type === "limit" && !flags.scale) {
+              return true;
+            }
+          }
+          return false;
+        },
       },
       amount: {
         type: "number",
