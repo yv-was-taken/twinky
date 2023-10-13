@@ -23,10 +23,10 @@
   "name": "blink",
   "version": "0.1.0",
   "description": "Blink: Crypto Trading API Modular CLI Suite",
-  "main": "index.mjs",
+  "main": "index.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ywvlfy/blink.git"
+    "url": "git+https://github.com/yv-was-taken/blink.git"
   },
   "keywords": [
     "crypto",
@@ -38,9 +38,9 @@
   "author": "yv-was-taken",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ywvlfy/blink/issues"
+    "url": "https://github.com/yv-was-taken/blink/issues"
   },
-  "homepage": "https://github.com/ywvlfy/blink#readme",
+  "homepage": "https://github.com/yv-was-taken/blink#readme",
   "devDependencies": {
     "@types/chai": "^4.3.5",
     "@types/inquirer": "^9.0.3",
