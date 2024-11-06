@@ -13,9 +13,9 @@
     "ts-node": "^10.9.1"
   },
   "scripts": {
-    "start": "ts-node index.ts",
+    "start": "bun run index.ts",
     "prepare": "husky install",
-    "test": "ts-mocha -n loader=ts-node/esm -p tsconfig.json tests/**/*.test.ts --timeout 10000"
+    "test": "bun test --timeout 10000"
   },
   "lint-staged": {
     "*": "prettier --ignore-unknown --write"
