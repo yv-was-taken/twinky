@@ -6,7 +6,7 @@ chai.use(chaiExec);
 describe("command line flags", () => {
   it("should display help message when --help flag is passed", () => {
     const helpMessage = `
-  twinky: Crypto Trading API Modular CLI Suite
+    Twinky: Crypto Trading API Modular CLI Suite
 
   actions:
           -trade(t)
@@ -15,7 +15,7 @@ describe("command line flags", () => {
           -listen(l)
       --> listen for and log portfolio updates in real time.
 
-              -view(v)
+          -view(v)
       --> view portfolio, open orders, order history.
 
           -settings(s)
@@ -26,12 +26,13 @@ describe("command line flags", () => {
 
           -exit
       --> exit the program.
+     
 `;
-    const command = chaiExec("npx ts-node index.ts --help");
+    const command = chaiExec("bun run index.ts --help");
     chai.expect(command.stdout.trim()).to.contain(helpMessage.trim());
   });
   it("should output version when --version flag is called", () => {
-    const command = chaiExec("npx ts-node index.ts --version");
+    const command = chaiExec("bun run index.ts --version");
     chai
       .expect(command.stdout.trim())
       .to.equal(process.env.npm_package_version);
