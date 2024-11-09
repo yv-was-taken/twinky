@@ -47,7 +47,7 @@ describe("setConfig", () => {
     });
 
     const configFileContent = JSON.parse(
-      fs.readFileSync(".twinkyConfig.json", "utf8"),
+      fs.readFileSync("twinky/config.json", "utf8"),
     );
 
     expect(configFileContent).to.deep.equal(customConfig);
@@ -65,7 +65,7 @@ describe("getConfig", () => {
     };
 
     // fs.writeFileSync(
-    //     ".twinkyConfig.json",
+    //     "twinky/config.json",
     //     JSON.stringify(expectedConfig, null, 2),
     // );
     setConfig({
@@ -82,7 +82,7 @@ describe("getConfig", () => {
   });
 
   it("should throw an error if the config file does not exist", () => {
-    fs.unlinkSync(".twinkyConfig.json");
+    fs.unlinkSync("twinky/config.json");
 
     expect(getConfig).to.throw(Error);
   });

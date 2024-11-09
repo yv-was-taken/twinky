@@ -11,7 +11,7 @@ describe("setEnv", () => {
 
     setEnv({ exchange: exchange, apiKey: apiKey, apiSecret: apiSecret });
 
-    const envFileContent = fs.readFileSync(".env.json", "utf8");
+    const envFileContent = fs.readFileSync("twinky/env.json", "utf8");
     const env = JSON.parse(envFileContent);
 
     expect(env[exchange].API_KEY).to.equal(apiKey);
@@ -22,7 +22,7 @@ describe("setEnv", () => {
 describe("getEnv", () => {
   it("should return the environment variable", () => {
     fs.writeFileSync(
-      ".env.json",
+      "twinky/env.json",
       JSON.stringify({ API_KEY: "test-api-key" }, null, 2),
     );
     const env = getEnv();
@@ -31,7 +31,7 @@ describe("getEnv", () => {
   });
 
   it("should throw an error if the env file does not exist", () => {
-    fs.unlinkSync(".env.json");
+    fs.unlinkSync("twinky/env.json");
 
     expect(getEnv).to.throw(Error);
   });

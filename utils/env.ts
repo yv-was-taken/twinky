@@ -32,7 +32,7 @@ export async function setEnv({
     };
   }
 
-  fs.writeFileSync(".env.json", JSON.stringify(env, null, 2));
+  fs.writeFileSync("twinky/env.json", JSON.stringify(env, null, 2));
   await setTimeout(() => {}, 500);
   console.log("Env set!");
   await sleep(500);
@@ -41,7 +41,7 @@ export async function setEnv({
 
 export function getEnv() {
   try {
-    const envFileContent = fs.readFileSync(".env.json", "utf8");
+    const envFileContent = fs.readFileSync("twinky/env.json", "utf8");
     const env = JSON.parse(envFileContent);
     return env;
   } catch (err) {

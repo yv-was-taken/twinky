@@ -119,7 +119,10 @@ export async function verifyConfig({
   asset,
   leverage,
 }: VerifyConfigProps) {
-  if (!fs.existsSync(".twinkyConfig.json")) {
+  if (!fs.existsSync("./twinky")) {
+    fs.mkdirSync("./twinky");
+  }
+  if (!fs.existsSync("twinky/config.json")) {
     const setInitialConfigAsDefault = await confirm({
       message:
         "config not found! Would you like to set a custom config?  (otherwise load default values.)",
@@ -156,11 +159,14 @@ export async function verifyEnv({
   exchange,
 }: VerifyEnvProps) {
   //    const { exchange } = await getConfig();
+  if (!fs.existsSync("./twinky")) {
+    fs.mkdirSync("./twinky");
+  }
 
   while (true) {
     if (!exchange || !newKey || !newSecret) {
       try {
-        fs.readFileSync(".env.json");
+        fs.readFileSync("twinky/env.json");
         return;
       } catch (err) {
         console.log(
