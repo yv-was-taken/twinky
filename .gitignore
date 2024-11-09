@@ -7,9 +7,6 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-#twinky specific config files
-twinky
-
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -133,3 +130,5 @@ dist
 .pnp.*
 
 .COMMIT_MESSAGE
+
+twinky

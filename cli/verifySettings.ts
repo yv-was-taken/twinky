@@ -224,7 +224,25 @@ export async function verifyEnv({
     }
   }
 }
+
+function verifyGitIgnore() {
+  const gitignorePath = ".gitignore";
+
+  if (!fs.existsSync(gitignorePath)) {
+    fs.writeFileSync(gitignorePath, "");
+  }
+
+  const gitignoreContent = fs.readFileSync(gitignorePath, "utf8");
+
+  // Check if twinky is already ignored
+  if (!gitignoreContent.split("\n").some((line) => line.trim() === "twinky")) {
+    // Add twinky to gitignore
+    fs.appendFileSync(gitignorePath, "\ntwinky");
+  }
+}
+
 export async function verifySettings({ modifyConfig = false }) {
+  verifyGitIgnore();
   await verifyConfig({ modifyConfig: modifyConfig });
   await verifyEnv({});
 }
