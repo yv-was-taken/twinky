@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 import { main, verifySettings } from "./cli/index.ts";
 import { inputs, flags } from "./parse/cli.ts";
 
