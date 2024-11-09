@@ -24,6 +24,7 @@
   "version": "0.1.0",
   "description": "Twinky: Crypto Trading API Modular CLI Suite",
   "main": "index.ts",
+  "bin": "./index.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yv-was-taken/twinky.git"
@@ -46,7 +47,6 @@
     "@types/inquirer": "^9.0.3",
     "@types/mocha": "^10.0.1",
     "eslint": "^8.42.0",
-    "husky": "^8.0.0",
     "lint-staged": "^13.2.3",
     "prettier": "^3.0.1"
   }
